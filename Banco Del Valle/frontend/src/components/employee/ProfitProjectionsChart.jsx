@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
 import { apiClient } from '../../services/apiClient';
+import { simSocket } from '../../services/simSocket';
 
 /**
  * ProfitProjectionsChart — Curvas multi-escenario de ganancias y patrimonio (Adaptado a Dark Mode y tiempo real).
@@ -107,8 +108,17 @@ export function ProfitProjectionsChart({ kpis }) {
     };
 
     cargarProyecciones();
+
+    const unsubscribe = simSocket.subscribe((msg) => {
+      if (msg.tipo === 'RESET') {
+        setHorizonte('1_ANO');
+        cargarProyecciones();
+      }
+    });
+
     return () => {
       cancelado = true;
+      unsubscribe();
     };
   }, [horizonte, capitalBase]);
 

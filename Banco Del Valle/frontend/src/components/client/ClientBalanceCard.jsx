@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wallet, TrendingUp, ArrowUpRight, ArrowDownLeft, Clock, ShieldCheck } from 'lucide-react';
+import { Wallet, TrendingUp, ArrowUpRight, ArrowDownLeft, Clock, ShieldCheck, RotateCcw } from 'lucide-react';
 
 /**
  * ClientBalanceCard — Tarjeta de saldo transaccional y rendimiento diario de cuenta (Alto contraste y Dark Mode).
@@ -12,6 +12,8 @@ export function ClientBalanceCard({
   onTransferClick,
   onDepositClick,
   onFixedTermClick,
+  onResetClick,
+  isResetting = false,
 }) {
   const formatearPesos = (val) =>
     new Intl.NumberFormat('es-AR', {
@@ -72,7 +74,7 @@ export function ClientBalanceCard({
       </div>
 
       {/* Botones de Operatoria Transaccional Rápida */}
-      <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-4 pt-6">
+      <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6">
         <button
           type="button"
           onClick={onTransferClick}
@@ -94,10 +96,21 @@ export function ClientBalanceCard({
         <button
           type="button"
           onClick={onFixedTermClick}
-          className="col-span-2 sm:col-span-1 p-3.5 bg-white/10 hover:bg-white/20 border border-white/15 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition"
+          className="p-3.5 bg-white/10 hover:bg-white/20 border border-white/15 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition"
         >
           <Clock className="w-4 h-4 text-sky-400" />
           <span>Plazo Fijo (38% TNA)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onResetClick}
+          disabled={isResetting}
+          title="Restablecer cuenta a saldo inicial $3.000.000"
+          className="p-3.5 bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 text-rose-200 hover:text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition"
+        >
+          <RotateCcw className={`w-4 h-4 text-rose-400 ${isResetting ? 'animate-spin' : ''}`} />
+          <span>{isResetting ? 'Restableciendo...' : 'Restablecer Saldo Base'}</span>
         </button>
       </div>
     </div>

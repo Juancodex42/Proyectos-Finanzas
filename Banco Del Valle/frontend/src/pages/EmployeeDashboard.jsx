@@ -9,7 +9,7 @@ import { OperationsTable } from '../components/employee/OperationsTable';
 import { ExportModal } from '../components/common/ExportModal';
 import { apiClient } from '../services/apiClient';
 import { simSocket } from '../services/simSocket';
-import { ShieldCheck, Download, Loader2 } from 'lucide-react';
+import { ShieldCheck, Download, RotateCcw, Loader2 } from 'lucide-react';
 
 /**
  * EmployeeDashboard — Terminal Ejecutiva y Cuantitativa de Control Bancario.
@@ -20,6 +20,8 @@ export function EmployeeDashboard() {
   const [almGaps, setAlmGaps] = useState([]);
   const [liveRates, setLiveRates] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isResetting, setIsResetting] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [exportModulo, setExportModulo] = useState('BALANCE');
 
@@ -32,8 +34,8 @@ export function EmployeeDashboard() {
         apiClient.getLiveRates().catch(() => null),
       ]);
       if (resKpis) setKpis(resKpis);
-      if (resOps) setOperaciones(resOps);
-      if (resGaps && resGaps.length) setAlmGaps(resGaps);
+      if (Array.isArray(resOps)) setOperaciones(resOps);
+      if (Array.isArray(resGaps)) setAlmGaps(resGaps);
       if (resRates) setLiveRates(resRates);
     } catch (e) {
       console.error('[EmployeeDashboard] Error al recargar métricas:', e);
@@ -42,16 +44,32 @@ export function EmployeeDashboard() {
     }
   };
 
+  const handleGlobalReset = async () => {
+    setIsResetting(true);
+    try {
+      simSocket.reiniciar();
+      await apiClient.resetSimulacion();
+      setResetKey((prev) => prev + 1);
+      await recargarMetricas();
+    } catch (err) {
+      console.error('[EmployeeDashboard] Error al restablecer simulación:', err);
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   useEffect(() => {
     recargarMetricas();
 
     // Actualización reactiva por cada tick o reset del reloj de simulación
     const unsubscribe = simSocket.subscribe((msg) => {
-      if (
+      if (msg.tipo === 'RESET') {
+        setResetKey((prev) => prev + 1);
+        recargarMetricas();
+      } else if (
         msg.tipo === 'TICK' ||
         msg.tipo === 'TICK_DIARIO' ||
-        msg.tipo === 'BALANCE_ACTUALIZADO' ||
-        msg.tipo === 'RESET'
+        msg.tipo === 'BALANCE_ACTUALIZADO'
       ) {
         recargarMetricas();
       }
@@ -84,7 +102,18 @@ export function EmployeeDashboard() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={handleGlobalReset}
+            disabled={isResetting}
+            title="Restablecer simulación, base de datos y todas las gráficas a valores iniciales"
+            className="px-3.5 py-2 bg-slate-100 hover:bg-rose-50 dark:bg-valle-darkElevated dark:hover:bg-rose-950/40 text-slate-700 hover:text-rose-600 dark:text-slate-200 dark:hover:text-rose-400 font-bold text-xs rounded-xl border border-slate-300 dark:border-valle-darkBorder hover:border-rose-400 transition flex items-center gap-1.5 shadow-xs"
+          >
+            <RotateCcw className={`w-4 h-4 text-rose-500 ${isResetting ? 'animate-spin' : ''}`} />
+            <span>{isResetting ? 'Restableciendo...' : 'Restablecer Valores Iniciales'}</span>
+          </button>
+
           <button
             type="button"
             onClick={() => handleOpenExport('BALANCE')}
@@ -97,25 +126,31 @@ export function EmployeeDashboard() {
       </div>
 
       {/* Centro de Mando del Time-Warp Engine */}
-      <SimController onTickUpdate={recargarMetricas} />
+      <SimController onTickUpdate={(msg) => {
+        if (msg?.tipo === 'RESET') {
+          setResetKey((prev) => prev + 1);
+        }
+        recargarMetricas();
+      }} />
 
       {/* Tarjetas Bento Grid de Métricas Principales */}
-      <KpiGrid kpis={kpis} />
+      <KpiGrid key={`kpis-${resetKey}`} kpis={kpis} />
 
       {/* Segmentación Analítica: Fila 1 (Donut de Balance + Barras ALM) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <BalanceDonutChart kpis={kpis} />
-        <AlmGapsBarChart data={almGaps} />
+        <BalanceDonutChart key={`donut-${resetKey}`} kpis={kpis} />
+        <AlmGapsBarChart key={`gaps-${resetKey}`} data={almGaps} />
       </div>
 
       {/* Segmentación Analítica: Fila 2 (Proyecciones Multi-Escenario + Spread Fisher) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <ProfitProjectionsChart kpis={kpis} />
-        <LiveRatesChart rates={liveRates} />
+        <ProfitProjectionsChart key={`projections-${resetKey}`} kpis={kpis} />
+        <LiveRatesChart key={`rates-${resetKey}`} rates={liveRates} />
       </div>
 
       {/* Tabla de Operaciones de Cartera Crediticia */}
       <OperationsTable
+        key={`ops-${resetKey}`}
         operaciones={operaciones}
         onExportClick={() => handleOpenExport('PRESTAMOS')}
       />

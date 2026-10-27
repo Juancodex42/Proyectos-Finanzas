@@ -22,12 +22,15 @@ export function RegisterModal({ isOpen, onClose, onSuccess, initialTipo = 'PERSO
     }
   }, [isOpen, initialTipo]);
 
-  // Form Persona
+  // Expresión regular estándar para formato de email
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Form Persona (ejemplo inicial válido no colisionante)
   const [persona, setPersona] = useState({
-    dni: '20-35123456-7',
-    nombre_completo: 'Juan José Gonzalez',
-    email: 'juan.gonzalez@bancodelvalle.com.ar',
-    password: 'Password123!',
+    dni: '20-43512389-4',
+    nombre_completo: 'Mariano Cordero',
+    email: 'mariano.cordero@valle.com.ar',
+    password: 'ValleSeguro2026!',
     localidad: 'San Fernando del Valle de Catamarca',
     categoria_laboral: 'EMPLEADO_PUBLICO',
     antiguedad_laboral_meses: 24,
@@ -36,15 +39,15 @@ export function RegisterModal({ isOpen, onClose, onSuccess, initialTipo = 'PERSO
     es_cuenta_sueldo: true,
   });
 
-  // Form Empresa
+  // Form Empresa (ejemplo inicial corporativo válido)
   const [empresa, setEmpresa] = useState({
-    cuit: '30-71234567-8',
-    razon_social: 'Catamarca Minería & Servicios S.A.',
-    email: 'contacto@catamarcamineria.com.ar',
-    password: 'Password123!',
+    cuit: '30-79888123-5',
+    razon_social: 'Valle Andino Logística S.A.',
+    email: 'contacto@valleandino.com.ar',
+    password: 'EmpresaValle2026!',
     localidad: 'San Fernando del Valle de Catamarca',
     tipo_societario: 'SA',
-    rubro_actividad: 'Servicios Mineros e Industriales',
+    rubro_actividad: 'Servicios Logísticos e Industriales',
     facturacion_anual_comprobada: 180000000,
     exencion_impositiva: false,
   });
@@ -53,8 +56,87 @@ export function RegisterModal({ isOpen, onClose, onSuccess, initialTipo = 'PERSO
 
   if (!isOpen) return null;
 
+  // Validación estricta del Paso 1 (Identificación y Credenciales)
+  const validarPaso1 = () => {
+    if (tipo === 'PERSONA') {
+      const dniLimpio = (persona.dni || '').replace(/\D/g, '');
+      if (!dniLimpio || dniLimpio.length < 7 || dniLimpio.length > 11) {
+        return 'El DNI debe contener entre 7 y 8 dígitos numéricos (o 11 dígitos para formato CUIL).';
+      }
+      const nombreLimpio = (persona.nombre_completo || '').trim();
+      if (!nombreLimpio || nombreLimpio.length < 3) {
+        return 'El nombre completo debe tener al menos 3 caracteres.';
+      }
+      const emailLimpio = (persona.email || '').trim();
+      if (!emailLimpio || !EMAIL_REGEX.test(emailLimpio)) {
+        return 'Por favor ingresá un correo electrónico válido (ej. usuario@correo.com).';
+      }
+      const pass = persona.password || '';
+      if (pass.length < 8) {
+        return 'La contraseña debe tener al menos 8 caracteres.';
+      }
+      if (!/[A-Za-z]/.test(pass) || !/\d/.test(pass)) {
+        return 'La contraseña debe combinar letras y al menos un número.';
+      }
+    } else {
+      const cuitLimpio = (empresa.cuit || '').replace(/\D/g, '');
+      if (!cuitLimpio || cuitLimpio.length !== 11) {
+        return 'El CUIT corporativo debe contener exactamente 11 dígitos numéricos.';
+      }
+      const razonLimpia = (empresa.razon_social || '').trim();
+      if (!razonLimpia || razonLimpia.length < 3) {
+        return 'La razón social de la empresa debe tener al menos 3 caracteres.';
+      }
+      const emailLimpio = (empresa.email || '').trim();
+      if (!emailLimpio || !EMAIL_REGEX.test(emailLimpio)) {
+        return 'Por favor ingresá un correo corporativo válido (ej. contacto@empresa.com).';
+      }
+      const pass = empresa.password || '';
+      if (pass.length < 8) {
+        return 'La contraseña corporativa debe tener al menos 8 caracteres.';
+      }
+      if (!/[A-Za-z]/.test(pass) || !/\d/.test(pass)) {
+        return 'La contraseña corporativa debe combinar letras y al menos un número.';
+      }
+    }
+    return null;
+  };
+
+  // Validación estricta del Paso 2 (Perfil Socioeconómico)
+  const validarPaso2 = () => {
+    if (tipo === 'PERSONA') {
+      const antiguedad = Number(persona.antiguedad_laboral_meses);
+      if (isNaN(antiguedad) || antiguedad < 0) {
+        return 'La antigüedad laboral debe ser un valor numérico mayor o igual a 0.';
+      }
+      const ingreso = Number(persona.ingreso_mensual_comprobado);
+      if (isNaN(ingreso) || ingreso < 0) {
+        return 'El ingreso mensual comprobado no puede ser un valor negativo.';
+      }
+    } else {
+      const facturacion = Number(empresa.facturacion_anual_comprobada);
+      if (isNaN(facturacion) || facturacion < 0) {
+        return 'La facturación anual no puede ser un valor negativo.';
+      }
+    }
+    return null;
+  };
+
   const handleNext = () => {
     setError(null);
+    if (step === 1) {
+      const err = validarPaso1();
+      if (err) {
+        setError(err);
+        return;
+      }
+    } else if (step === 2) {
+      const err = validarPaso2();
+      if (err) {
+        setError(err);
+        return;
+      }
+    }
     setStep((prev) => Math.min(prev + 1, 3));
   };
 
@@ -64,8 +146,21 @@ export function RegisterModal({ isOpen, onClose, onSuccess, initialTipo = 'PERSO
   };
 
   const handleCrearCuenta = async () => {
-    setLoading(true);
     setError(null);
+    const err1 = validarPaso1();
+    if (err1) {
+      setError(err1);
+      setStep(1);
+      return;
+    }
+    const err2 = validarPaso2();
+    if (err2) {
+      setError(err2);
+      setStep(2);
+      return;
+    }
+
+    setLoading(true);
     try {
       let res;
       if (tipo === 'PERSONA') {
@@ -288,6 +383,7 @@ export function RegisterModal({ isOpen, onClose, onSuccess, initialTipo = 'PERSO
                         placeholder="Mínimo 8 caracteres"
                         className="w-full text-sm px-3.5 py-2.5 bg-white dark:bg-valle-darkElevated border border-slate-300 dark:border-valle-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-valle-orange text-slate-900 dark:text-slate-100"
                       />
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Mínimo 8 caracteres con letras y números</p>
                     </div>
                   </div>
                 </div>

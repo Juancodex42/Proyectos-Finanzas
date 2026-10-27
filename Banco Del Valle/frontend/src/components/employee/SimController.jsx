@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, FastForward, SkipForward, Users, Clock, RotateCcw } from 'lucide-react';
 import { simSocket } from '../../services/simSocket';
+import { apiClient } from '../../services/apiClient';
 
 /**
  * SimController — Centro de Mando del Motor de Tiempo Acelerado (Time-Warp Engine) con diseño de alta visibilidad.
@@ -74,20 +75,32 @@ export function SimController({ onTickUpdate }) {
     simSocket.inyectarTrafico(5);
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (!confirmandoReset) {
       setConfirmandoReset(true);
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
       resetTimerRef.current = setTimeout(() => {
         setConfirmandoReset(false);
-      }, 3500);
+      }, 4000);
       return;
     }
 
     if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
     setConfirmandoReset(false);
     setCorriendo(false);
-    simSocket.reiniciar();
+    setVelocidad(1);
+    setFechaVirtual('2026-10-26');
+
+    try {
+      simSocket.reiniciar();
+      await apiClient.resetSimulacion();
+    } catch (err) {
+      console.warn('[SimController] Error en reset HTTP:', err);
+    } finally {
+      if (onTickUpdate) {
+        onTickUpdate({ tipo: 'RESET', fecha_virtual: '2026-10-26' });
+      }
+    }
   };
 
   return (

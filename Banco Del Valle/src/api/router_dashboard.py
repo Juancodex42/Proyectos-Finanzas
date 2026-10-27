@@ -181,7 +181,7 @@ def obtener_brechas_alm():
 
 @router.post("/api/dashboard/simulacion/reset")
 @router.post("/api/simulacion/reset")
-def reset_simulacion_http():
+async def reset_simulacion_http():
     """Restablece el reloj virtual de simulación y la base de datos a su estado inicial limpio."""
     reloj = SimulationClock.get_instance()
     reloj.reiniciar(date(2026, 10, 26))
@@ -189,14 +189,39 @@ def reset_simulacion_http():
     try:
         reset_database(conn)
         ultimo_b = balance_repo.obtener_ultimo_balance(conn)
-        return {
-            "exito": True,
-            "mensaje": "Simulación y base de datos restablecidas al estado inicial.",
-            "fecha_simulada": "2026-10-26",
-            "capital_propio": ultimo_b.capital_propio_patrimonio if ultimo_b else 50000000.0,
+        est = reloj.obtener_estado()
+        evento_reset = {
+            "tipo": "RESET",
+            "subtipo": "SIMULACION_REINICIADA",
+            "fecha_simulada": est["fecha_virtual"],
+            "fecha_virtual": est["fecha_virtual"],
+            "estado_reloj": est,
+            "balance": {
+                "capital_propio": ultimo_b.capital_propio_patrimonio if ultimo_b else 50000000.0,
+                "patrimonio_neto": ultimo_b.capital_propio_patrimonio if ultimo_b else 50000000.0,
+                "cashflow_seguro": ultimo_b.cashflow_seguro_prestable if ultimo_b else 57600000.0,
+                "encaje_bcra": ultimo_b.encaje_obligatorio_bcra if ultimo_b else 5400000.0,
+                "depositos_flexibles": ultimo_b.total_depositos_flexibles if ultimo_b else 18000000.0,
+                "total_prestado": ultimo_b.total_prestado_activo if ultimo_b else 0.0,
+            },
+            **est,
         }
     finally:
         conn.close()
+
+    try:
+        from src.api.websocket_sim import manager
+        await manager.broadcast(evento_reset)
+    except Exception as exc:
+        pass
+
+    return {
+        "exito": True,
+        "mensaje": "Simulación y base de datos restablecidas al estado inicial.",
+        "fecha_simulada": "2026-10-26",
+        "capital_propio": ultimo_b.capital_propio_patrimonio if ultimo_b else 50000000.0,
+        "balance": evento_reset["balance"],
+    }
 
 
 

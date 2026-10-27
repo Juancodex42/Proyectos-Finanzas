@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, CheckCircle2, ArrowRight, Download, Sparkles, Search, Loader2 } from 'lucide-react';
+import { Calculator, CheckCircle2, ArrowRight, Download, Sparkles, Search, Loader2, RotateCcw } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
 
 /**
@@ -33,6 +33,15 @@ export function LoanSimulator({ onOpenRegister, onExportModal }) {
     } finally {
       setBuscandoDni(false);
     }
+  };
+
+  const handleResetValores = () => {
+    setMonto(1500000);
+    setCuotas(24);
+    setIngresoDeclarado(3000000);
+    setCategoriaLaboral('EMPLEADO_PUBLICO');
+    setDni('20-42049164-7');
+    setClienteEncontrado(null);
   };
 
   const ejecutarSimulacion = async () => {
@@ -116,6 +125,15 @@ export function LoanSimulator({ onOpenRegister, onExportModal }) {
           >
             {buscandoDni ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             <span>Validar</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleResetValores}
+            title="Restablecer cotizador a valores iniciales"
+            className="p-2 sm:px-3 bg-slate-200/80 hover:bg-rose-50 hover:text-rose-600 dark:bg-valle-darkBorder dark:hover:bg-rose-950/40 text-slate-600 dark:text-slate-300 dark:hover:text-rose-400 text-xs sm:text-sm font-bold rounded-lg sm:rounded-xl transition flex items-center gap-1.5 flex-shrink-0"
+          >
+            <RotateCcw className="w-4 h-4 text-rose-500" />
+            <span className="hidden sm:inline">Reset</span>
           </button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TrendingUp, Clock, Zap, ArrowRight, ShieldCheck } from 'lucide-react';
+import { TrendingUp, Clock, Zap, ArrowRight, ShieldCheck, RotateCcw } from 'lucide-react';
 
 /**
  * DepositSimulator — Comparador de inversiones: Plazo Fijo vs Cuenta Flexible Money Market (Alto contraste y Dark Mode).
@@ -22,19 +22,36 @@ export function DepositSimulator({ onOpenRegister }) {
       maximumFractionDigits: 0,
     }).format(val || 0);
 
+  const handleResetValores = () => {
+    setCapital(1000000);
+    setDias(30);
+  };
+
   return (
     <div id="simulador-inversiones" className="valle-card p-4 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl transition-colors duration-200">
-      <div className="pb-4 sm:pb-6 mb-6 sm:mb-8 border-b border-slate-200 dark:border-valle-darkBorder">
-        <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">
-          <TrendingUp className="w-4 h-4" />
-          <span>Ahorro & Rentabilidad Inteligente</span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 sm:pb-6 mb-6 sm:mb-8 border-b border-slate-200 dark:border-valle-darkBorder gap-3">
+        <div>
+          <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">
+            <TrendingUp className="w-4 h-4" />
+            <span>Ahorro & Rentabilidad Inteligente</span>
+          </div>
+          <h2 className="font-display font-extrabold text-xl sm:text-3xl text-slate-900 dark:text-white">
+            Simulador de Inversiones y Liquidez
+          </h2>
+          <p className="text-xs sm:text-base text-slate-600 dark:text-slate-300 mt-1">
+            Elegí entre maximizar tu tasa a plazo o mantener disponibilidad inmediata con rendimiento diario.
+          </p>
         </div>
-        <h2 className="font-display font-extrabold text-xl sm:text-3xl text-slate-900 dark:text-white">
-          Simulador de Inversiones y Liquidez
-        </h2>
-        <p className="text-xs sm:text-base text-slate-600 dark:text-slate-300 mt-1">
-          Elegí entre maximizar tu tasa a plazo o mantener disponibilidad inmediata con rendimiento diario.
-        </p>
+
+        <button
+          type="button"
+          onClick={handleResetValores}
+          title="Restablecer simulador de inversiones a valores iniciales"
+          className="self-start sm:self-center px-3 py-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 dark:bg-valle-darkElevated dark:hover:bg-rose-950/40 text-slate-600 dark:text-slate-300 dark:hover:text-rose-400 text-xs sm:text-sm font-bold rounded-xl border border-slate-300 dark:border-valle-darkBorder hover:border-rose-400 transition flex items-center gap-1.5 shadow-xs"
+        >
+          <RotateCcw className="w-3.5 h-3.5 text-rose-500" />
+          <span>Restablecer</span>
+        </button>
       </div>
 
       {/* Controles */}

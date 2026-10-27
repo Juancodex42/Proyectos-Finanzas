@@ -178,8 +178,61 @@ def registrar_nueva_persona(
     conn: sqlite3.Connection, dto: RegistroPersonaDTO
 ) -> RespuestaRegistroDTO:
     """Ejecuta el onboarding atómico de una Persona humana con caja de ahorros y credenciales."""
-    dni_limpio = dto.dni.strip().replace(".", "").replace("-", "")
+    dni_limpio = re.sub(r"\D", "", dto.dni.strip())
     email_limpio = dto.email.strip().lower()
+    nombre_limpio = dto.nombre_completo.strip()
+
+    if len(dni_limpio) < 7 or len(dni_limpio) > 11:
+        return RespuestaRegistroDTO(
+            exito=False,
+            mensaje="El DNI debe contener entre 7 y 8 dígitos numéricos (o 11 dígitos para CUIL).",
+            usuario_id=0,
+            identificador="",
+            email="",
+            rol=RolUsuario.CLIENTE,
+            cbu_asignado="",
+            alias_asignado="",
+            token_acceso="",
+        )
+
+    if len(nombre_limpio) < 3:
+        return RespuestaRegistroDTO(
+            exito=False,
+            mensaje="El nombre completo debe tener al menos 3 caracteres.",
+            usuario_id=0,
+            identificador="",
+            email="",
+            rol=RolUsuario.CLIENTE,
+            cbu_asignado="",
+            alias_asignado="",
+            token_acceso="",
+        )
+
+    if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email_limpio):
+        return RespuestaRegistroDTO(
+            exito=False,
+            mensaje="El formato del correo electrónico no es válido.",
+            usuario_id=0,
+            identificador="",
+            email="",
+            rol=RolUsuario.CLIENTE,
+            cbu_asignado="",
+            alias_asignado="",
+            token_acceso="",
+        )
+
+    if len(dto.password) < 8 or not re.search(r"[A-Za-z]", dto.password) or not re.search(r"\d", dto.password):
+        return RespuestaRegistroDTO(
+            exito=False,
+            mensaje="La contraseña debe tener al menos 8 caracteres e incluir al menos una letra y un número.",
+            usuario_id=0,
+            identificador="",
+            email="",
+            rol=RolUsuario.CLIENTE,
+            cbu_asignado="",
+            alias_asignado="",
+            token_acceso="",
+        )
 
     if persona_repo.obtener_persona_por_dni(conn, dni_limpio):
         return RespuestaRegistroDTO(
@@ -301,8 +354,61 @@ def registrar_nueva_empresa(
     conn: sqlite3.Connection, dto: RegistroEmpresaDTO
 ) -> RespuestaRegistroDTO:
     """Ejecuta el onboarding atómico de una Persona Jurídica / PyME con cuenta operativa."""
-    cuit_limpio = dto.cuit.strip().replace(" ", "")
+    cuit_limpio = re.sub(r"\D", "", dto.cuit.strip())
     email_limpio = dto.email.strip().lower()
+    razon_limpia = dto.razon_social.strip()
+
+    if len(cuit_limpio) != 11:
+        return RespuestaRegistroDTO(
+            exito=False,
+            mensaje="El CUIT corporativo debe contener exactamente 11 dígitos numéricos.",
+            usuario_id=0,
+            identificador="",
+            email="",
+            rol=RolUsuario.CLIENTE,
+            cbu_asignado="",
+            alias_asignado="",
+            token_acceso="",
+        )
+
+    if len(razon_limpia) < 3:
+        return RespuestaRegistroDTO(
+            exito=False,
+            mensaje="La razón social debe tener al menos 3 caracteres.",
+            usuario_id=0,
+            identificador="",
+            email="",
+            rol=RolUsuario.CLIENTE,
+            cbu_asignado="",
+            alias_asignado="",
+            token_acceso="",
+        )
+
+    if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email_limpio):
+        return RespuestaRegistroDTO(
+            exito=False,
+            mensaje="El formato del correo electrónico corporativo no es válido.",
+            usuario_id=0,
+            identificador="",
+            email="",
+            rol=RolUsuario.CLIENTE,
+            cbu_asignado="",
+            alias_asignado="",
+            token_acceso="",
+        )
+
+    if len(dto.password) < 8 or not re.search(r"[A-Za-z]", dto.password) or not re.search(r"\d", dto.password):
+        return RespuestaRegistroDTO(
+            exito=False,
+            mensaje="La contraseña debe tener al menos 8 caracteres e incluir al menos una letra y un número.",
+            usuario_id=0,
+            identificador="",
+            email="",
+            rol=RolUsuario.CLIENTE,
+            cbu_asignado="",
+            alias_asignado="",
+            token_acceso="",
+        )
 
     if empresa_repo.obtener_empresa_por_cuit(conn, cuit_limpio):
         return RespuestaRegistroDTO(

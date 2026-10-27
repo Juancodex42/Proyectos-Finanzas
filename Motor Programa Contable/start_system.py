@@ -206,7 +206,6 @@ def start_hidden():
             creationflags=SPAWN_FLAGS,
             startupinfo=get_silent_startupinfo()
         )
-        backend_log.close()
         print(f"Backend PID: {backend_proc.pid} (Port: {backend_port}, Py: {py_exe})")
         pids['backend_pid'] = backend_proc.pid
     else:
@@ -219,9 +218,9 @@ def start_hidden():
         node_exe = get_node_executable()
         vite_bin = os.path.join(frontend_dir, "node_modules", "vite", "bin", "vite.js")
         if os.path.exists(vite_bin):
-            frontend_cmd = [node_exe, vite_bin, "--port", str(frontend_port)]
+            frontend_cmd = [node_exe, vite_bin, "--host", "0.0.0.0", "--port", str(frontend_port)]
         else:
-            frontend_cmd = ["npm.cmd", "run", "dev", "--", "--port", str(frontend_port)]
+            frontend_cmd = ["npm.cmd", "run", "dev", "--", "--host", "0.0.0.0", "--port", str(frontend_port)]
         frontend_env = os.environ.copy()
         frontend_env["CI"] = "true"
         frontend_proc = subprocess.Popen(
@@ -234,7 +233,6 @@ def start_hidden():
             creationflags=SPAWN_FLAGS,
             startupinfo=get_silent_startupinfo()
         )
-        frontend_log.close()
         print(f"Frontend PID: {frontend_proc.pid} (Port: {frontend_port})")
         pids['frontend_pid'] = frontend_proc.pid
     else:

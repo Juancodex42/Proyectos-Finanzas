@@ -8,7 +8,7 @@ import { ExportModal } from '../components/common/ExportModal';
 import { apiClient } from '../services/apiClient';
 import { simSocket } from '../services/simSocket';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, RotateCcw } from 'lucide-react';
 
 /**
  * ClientHomeBanking — Panel transaccional de Home Banking (Juan José Gonzalez).
@@ -20,6 +20,7 @@ export function ClientHomeBanking({ onGoToDashboard }) {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [resetting, setResetting] = useState(false);
 
   // Modales
   const [isTransferOpen, setIsTransferOpen] = useState(false);
@@ -40,13 +41,31 @@ export function ClientHomeBanking({ onGoToDashboard }) {
     }
   };
 
+  const handleReset = async () => {
+    setResetting(true);
+    try {
+      simSocket.reiniciar();
+      await apiClient.resetSimulacion();
+      await cargarDatos();
+    } catch (err) {
+      console.error('[HomeBanking] Error al resetear cuenta:', err);
+    } finally {
+      setResetting(false);
+    }
+  };
+
   useEffect(() => {
     simSocket.connect();
     cargarDatos();
 
-    // Suscripción al WebSocket para actualizar saldo en cada tick
+    // Suscripción al WebSocket para actualizar saldo en cada tick y al resetear
     const unsubscribe = simSocket.subscribe((msg) => {
-      if (msg.tipo === 'TICK' || msg.tipo === 'TICK_DIARIO' || msg.tipo === 'BALANCE_ACTUALIZADO') {
+      if (
+        msg.tipo === 'TICK' ||
+        msg.tipo === 'TICK_DIARIO' ||
+        msg.tipo === 'BALANCE_ACTUALIZADO' ||
+        msg.tipo === 'RESET'
+      ) {
         cargarDatos();
       }
     });
@@ -98,9 +117,21 @@ export function ClientHomeBanking({ onGoToDashboard }) {
           </p>
         </div>
 
-        <div className="text-left sm:text-right text-xs sm:text-sm">
-          <span className="text-slate-600 dark:text-slate-400 font-medium">Estado de Cuenta:</span>{' '}
-          <strong className="text-emerald-700 dark:text-emerald-400 font-extrabold">ACTIVA (Al Día)</strong>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="text-left sm:text-right text-xs sm:text-sm">
+            <span className="text-slate-600 dark:text-slate-400 font-medium">Estado de Cuenta:</span>{' '}
+            <strong className="text-emerald-700 dark:text-emerald-400 font-extrabold">ACTIVA (Al Día)</strong>
+          </div>
+          <button
+            type="button"
+            onClick={handleReset}
+            disabled={resetting}
+            title="Restablecer cuenta a saldo inicial $3.000.000 y reiniciar simulación"
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 dark:bg-valle-darkElevated dark:hover:bg-rose-950/40 text-slate-700 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400 border border-slate-300 dark:border-valle-darkBorder hover:border-rose-400 text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
+          >
+            <RotateCcw className={`w-3.5 h-3.5 text-rose-500 ${resetting ? 'animate-spin' : ''}`} />
+            <span>{resetting ? 'Restableciendo...' : 'Restablecer Valores Iniciales'}</span>
+          </button>
         </div>
       </div>
 
@@ -113,6 +144,8 @@ export function ClientHomeBanking({ onGoToDashboard }) {
         onTransferClick={() => setIsTransferOpen(true)}
         onDepositClick={() => setIsDepositOpen(true)}
         onFixedTermClick={() => setIsFixedTermOpen(true)}
+        onResetClick={handleReset}
+        isResetting={resetting}
       />
 
       {/* Tabla de Movimientos */}

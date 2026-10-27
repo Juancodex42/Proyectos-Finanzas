@@ -71,8 +71,8 @@ def seed_initial_data(conn: sqlite3.Connection) -> None:
     if cursor.fetchone() is not None:
         return
 
-    today_iso = date.today().isoformat()
-    now_iso = datetime.now().isoformat()
+    today_iso = "2026-10-26"
+    now_iso = "2026-10-26 09:00:00"
 
     # 1. Persona Humana: Juan José Gonzalez (Catamarca)
     cursor.execute(
