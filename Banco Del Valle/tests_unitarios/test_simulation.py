@@ -230,3 +230,44 @@ def test_inyectar_trafico_sintetico(sim_db):
     assert isinstance(res, dict)
     assert res["depositos_generados"] >= 1
     assert res["creditos_otorgados"] >= 1
+
+
+def test_simulation_clock_reiniciar():
+    """Valida que el SimulationClock se reinicie a la fecha base, se pause y resetee contadores."""
+    clock = SimulationClock.get_instance()
+    clock.reanudar()
+    clock.avanzar_dias(15)
+    clock.fijar_velocidad(0.2)
+    assert clock.dias_transcurridos >= 15
+
+    nueva_fecha = clock.reiniciar(date(2026, 10, 26))
+    assert nueva_fecha == date(2026, 10, 26)
+    assert clock.fecha_actual == date(2026, 10, 26)
+    assert clock.en_pausa is True
+    assert clock.dias_transcurridos == 0
+    assert clock.segundos_por_dia == 1.0
+
+
+def test_reset_database(sim_db):
+    """Valida que reset_database limpie operaciones sintéticas y reimplante el seed base intacto."""
+    from src.database.connection import reset_database
+
+    conn, tmp_path = sim_db
+    # Inyectar tráfico para alterar la base
+    inyectar_trafico_sintetico(conn, date(2026, 10, 20), prob_deposito=1.0, prob_credito=1.0)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM prestamos")
+    cant_prestamos = cursor.fetchone()[0]
+    assert cant_prestamos > 0
+
+    # Ejecutar reset_database
+    reset_database(conn=conn)
+
+    # Validar que prestamos quede en 0 y Juan José vuelva a existir
+    cursor.execute("SELECT COUNT(*) FROM prestamos")
+    assert cursor.fetchone()[0] == 0
+
+    persona_juan = persona_repo.obtener_persona_por_dni(conn, "35123456")
+    assert persona_juan is not None
+    assert persona_juan.nombre_completo == "Juan José Gonzalez"
+

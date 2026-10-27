@@ -168,6 +168,18 @@ export const apiClient = {
     return request('/api/dashboard/operaciones');
   },
 
+  getAlmGaps: async () => {
+    return request('/api/dashboard/alm-gaps');
+  },
+
+  getLiveRates: async () => {
+    return request('/api/dashboard/live-rates');
+  },
+
+  resetSimulacion: async () => {
+    return request('/api/dashboard/simulacion/reset', { method: 'POST' });
+  },
+
   getProyecciones: async (escenario = 'BASE', horizonte = '1_ANO') => {
     const params = new URLSearchParams({ escenario, horizonte });
     return request(`/api/dashboard/proyecciones?${params.toString()}`);

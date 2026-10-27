@@ -47,8 +47,8 @@ export function Footer() {
   };
 
   return (
-    <footer className="bg-white dark:bg-valle-darkSurface text-slate-700 dark:text-slate-300 text-sm border-t border-slate-200 dark:border-valle-darkBorder mt-16 transition-colors duration-200">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 xl:px-12 py-12">
+    <footer className="bg-white dark:bg-valle-darkSurface text-slate-700 dark:text-slate-300 text-sm border-t border-slate-200 dark:border-valle-darkBorder mt-8 sm:mt-16 transition-colors duration-200">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 xl:px-12 py-8 sm:py-12">
         
         {/* FILA 1: INFORMACIÓN INSTITUCIONAL, PRODUCTOS Y ATENCIÓN AL CLIENTE */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">

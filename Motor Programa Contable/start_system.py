@@ -195,6 +195,7 @@ def start_hidden():
         env_vars["PORT"] = str(backend_port)
         env_vars["PYTHONUTF8"] = "1"
         env_vars["PYTHONIOENCODING"] = "utf-8"
+        env_vars["PYTHONUNBUFFERED"] = "1"
         backend_proc = subprocess.Popen(
             [py_exe, "app.py"],
             cwd=backend_dir,
@@ -205,6 +206,7 @@ def start_hidden():
             creationflags=SPAWN_FLAGS,
             startupinfo=get_silent_startupinfo()
         )
+        backend_log.close()
         print(f"Backend PID: {backend_proc.pid} (Port: {backend_port}, Py: {py_exe})")
         pids['backend_pid'] = backend_proc.pid
     else:
@@ -232,6 +234,7 @@ def start_hidden():
             creationflags=SPAWN_FLAGS,
             startupinfo=get_silent_startupinfo()
         )
+        frontend_log.close()
         print(f"Frontend PID: {frontend_proc.pid} (Port: {frontend_port})")
         pids['frontend_pid'] = frontend_proc.pid
     else:
@@ -247,7 +250,7 @@ def start_hidden():
     frontend_url = f"http://127.0.0.1:{frontend_port}"
     
     t_start = time.time()
-    while time.time() - t_start < 6.0:
+    while time.time() - t_start < 15.0:
         backend_ready = False
         frontend_ready = False
         try:

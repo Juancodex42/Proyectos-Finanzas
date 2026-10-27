@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 > nul
 setlocal EnableDelayedExpansion
-title Bot P2P Binance ARS - Institutional Quantitative Platform
+title Bot P2P Binance ARS - Modo Demo y Panel de Control
 
 cd /d "%~dp0"
 
@@ -30,7 +30,8 @@ echo.
 echo   [6] Salir
 echo.
 echo ===============================================================================
-set /p OPCION="Seleccione una opcion [1-6]: "
+set /p OPCION="Seleccione una opcion [1-6] (Enter para Modo Demo): "
+if "%OPCION%"=="" set OPCION=1
 
 if "%OPCION%"=="1" goto MODO_DEMO
 if "%OPCION%"=="2" goto MODO_MAIN

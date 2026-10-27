@@ -82,37 +82,37 @@ export function LoanSimulator({ onOpenRegister, onExportModal }) {
     }).format(val || 0);
 
   return (
-    <div id="simulador-prestamos" className="valle-card p-6 sm:p-10 mb-12 rounded-3xl transition-colors duration-200">
+    <div id="simulador-prestamos" className="valle-card p-4 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl transition-colors duration-200">
       {/* Encabezado del Simulador */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-8 border-b border-slate-200 dark:border-valle-darkBorder gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 sm:pb-6 mb-6 sm:mb-8 border-b border-slate-200 dark:border-valle-darkBorder gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-valle-orange mb-1.5">
+          <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-valle-orange mb-1">
             <Calculator className="w-4 h-4" />
-            <span>Simulador Inteligente con Validación Crediticia en Línea</span>
+            <span>Simulador Inteligente con Validación Crediticia</span>
           </div>
-          <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-white">
+          <h2 className="font-display font-extrabold text-xl sm:text-3xl text-slate-900 dark:text-white">
             Cotizá tu Préstamo Personal a Medida
           </h2>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-1 max-w-2xl">
-            Sistema Francés con cuota fija. Cotización conectada en vivo con la base de datos de Banco del Valle.
+          <p className="text-xs sm:text-base text-slate-600 dark:text-slate-300 mt-1 max-w-2xl">
+            Sistema Francés con cuota fija. Conectado en vivo con la base de datos de Banco del Valle.
           </p>
         </div>
 
         {/* Buscador de DNI */}
-        <div className="flex items-center gap-2 bg-slate-50 dark:bg-valle-darkElevated p-2.5 rounded-2xl border border-slate-300 dark:border-valle-darkBorder">
+        <div className="flex items-center gap-2 bg-slate-50 dark:bg-valle-darkElevated p-2 rounded-xl sm:rounded-2xl border border-slate-300 dark:border-valle-darkBorder w-full sm:w-auto">
           <input
             type="text"
             value={dni}
             onChange={(e) => setDni(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleConsultarDni()}
-            placeholder="Ingresá tu DNI / CUIL"
-            className="text-xs sm:text-sm px-3 py-2 bg-white dark:bg-valle-darkSurface border border-slate-300 dark:border-valle-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-valle-orange w-44 font-medium text-slate-900 dark:text-white"
+            placeholder="DNI / CUIL"
+            className="text-xs sm:text-sm px-3 py-2 bg-white dark:bg-valle-darkSurface border border-slate-300 dark:border-valle-darkBorder rounded-lg sm:rounded-xl outline-none focus:ring-2 focus:ring-valle-orange flex-1 sm:w-44 font-medium text-slate-900 dark:text-white"
           />
           <button
             type="button"
             onClick={handleConsultarDni}
             disabled={buscandoDni}
-            className="px-4 py-2 bg-valle-blue hover:bg-valle-bluelight text-white text-xs sm:text-sm font-bold rounded-xl transition flex items-center gap-1.5"
+            className="px-3.5 sm:px-4 py-2 bg-valle-blue hover:bg-valle-bluelight text-white text-xs sm:text-sm font-bold rounded-lg sm:rounded-xl transition flex items-center gap-1.5 flex-shrink-0"
           >
             {buscandoDni ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             <span>Validar</span>
@@ -138,9 +138,9 @@ export function LoanSimulator({ onOpenRegister, onExportModal }) {
       )}
 
       {/* Sliders y Resultados */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
         {/* Controles (Sliders) */}
-        <div className="lg:col-span-7 space-y-8">
+        <div className="lg:col-span-7 space-y-6 sm:space-y-8">
           {/* Slider Monto */}
           <div>
             <div className="flex justify-between items-center mb-2.5">

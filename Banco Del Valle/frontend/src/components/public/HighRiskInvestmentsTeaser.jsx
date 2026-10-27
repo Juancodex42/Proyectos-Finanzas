@@ -8,7 +8,7 @@ export function HighRiskInvestmentsTeaser() {
   const [avisado, setAvisado] = useState(false);
 
   return (
-    <div className="relative group bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-red-500/10 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-red-950/20 border border-orange-200 dark:border-orange-500/30 rounded-3xl p-6 mb-12 flex flex-col sm:flex-row items-center justify-between gap-4 transition hover:border-valle-orange shadow-xs">
+    <div className="relative group bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-red-500/10 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-red-950/20 border border-orange-200 dark:border-orange-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 transition hover:border-valle-orange shadow-xs">
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 rounded-2xl bg-valle-orange text-white flex items-center justify-center flex-shrink-0 shadow-sm">
           <Flame className="w-6 h-6 animate-pulse" />

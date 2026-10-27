@@ -1,38 +1,116 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
+import { apiClient } from '../../services/apiClient';
 
 /**
- * ProfitProjectionsChart — Curvas multi-escenario de ganancias y patrimonio (Adaptado a Dark Mode).
+ * ProfitProjectionsChart — Curvas multi-escenario de ganancias y patrimonio (Adaptado a Dark Mode y tiempo real).
  */
-export function ProfitProjectionsChart() {
+export function ProfitProjectionsChart({ kpis }) {
   const { isDark } = useTheme();
   const [horizonte, setHorizonte] = useState('1_ANO'); // '1_ANO' | '3_ANOS' | '5_ANOS'
+  const [chartData, setChartData] = useState([]);
 
-  // Datos simulados de proyecciones
-  const data1Ano = [
-    { periodo: 'Mes 1', optimista: 51200000, base: 50800000, pesimista: 50200000 },
-    { periodo: 'Mes 3', optimista: 54500000, base: 52400000, pesimista: 50900000 },
-    { periodo: 'Mes 6', optimista: 61000000, base: 56100000, pesimista: 51800000 },
-    { periodo: 'Mes 9', optimista: 68500000, base: 60200000, pesimista: 52600000 },
-    { periodo: 'Mes 12', optimista: 78000000, base: 65000000, pesimista: 53500000 },
-  ];
+  const capitalBase = Number(kpis?.patrimonio_neto || kpis?.capital_propio_patrimonio || 50000000);
 
-  const data3Anos = [
-    { periodo: 'Año 1', optimista: 78000000, base: 65000000, pesimista: 53500000 },
-    { periodo: 'Año 2', optimista: 125000000, base: 89000000, pesimista: 59000000 },
-    { periodo: 'Año 3', optimista: 195000000, base: 122000000, pesimista: 64000000 },
-  ];
+  useEffect(() => {
+    let cancelado = false;
 
-  const data5Anos = [
-    { periodo: 'Año 1', optimista: 78000000, base: 65000000, pesimista: 53500000 },
-    { periodo: 'Año 2', optimista: 125000000, base: 89000000, pesimista: 59000000 },
-    { periodo: 'Año 3', optimista: 195000000, base: 122000000, pesimista: 64000000 },
-    { periodo: 'Año 4', optimista: 290000000, base: 165000000, pesimista: 70000000 },
-    { periodo: 'Año 5', optimista: 410000000, base: 215000000, pesimista: 76000000 },
-  ];
+    const cargarProyecciones = async () => {
+      try {
+        const res = await apiClient.getProyecciones('BASE', horizonte);
+        if (cancelado) return;
 
-  const data = horizonte === '1_ANO' ? data1Ano : horizonte === '3_ANOS' ? data3Anos : data5Anos;
+        if (res && res.escenarios) {
+          const { base, optimista, pesimista } = res.escenarios;
+          const cBase = base?.curva_mensual || [];
+          const cOpt = optimista?.curva_mensual || [];
+          const cPes = pesimista?.curva_mensual || [];
+
+          if (horizonte === '1_ANO') {
+            const indices = [
+              { label: 'Mes 1', idx: 1 },
+              { label: 'Mes 3', idx: 3 },
+              { label: 'Mes 6', idx: 6 },
+              { label: 'Mes 9', idx: 9 },
+              { label: 'Mes 12', idx: 12 },
+            ];
+            setChartData(
+              indices.map(({ label, idx }) => ({
+                periodo: label,
+                optimista: Math.round(cOpt[idx] ?? capitalBase * (1 + 0.56 * (idx / 12))),
+                base: Math.round(cBase[idx] ?? capitalBase * (1 + 0.30 * (idx / 12))),
+                pesimista: Math.round(cPes[idx] ?? capitalBase * (1 + 0.07 * (idx / 12))),
+              }))
+            );
+          } else if (horizonte === '3_ANOS') {
+            const indices = [
+              { label: 'Año 1', idx: 12 },
+              { label: 'Año 2', idx: 24 },
+              { label: 'Año 3', idx: 36 },
+            ];
+            setChartData(
+              indices.map(({ label, idx }) => ({
+                periodo: label,
+                optimista: Math.round(cOpt[idx] ?? capitalBase * Math.pow(1.56, idx / 12)),
+                base: Math.round(cBase[idx] ?? capitalBase * Math.pow(1.30, idx / 12)),
+                pesimista: Math.round(cPes[idx] ?? capitalBase * Math.pow(1.07, idx / 12)),
+              }))
+            );
+          } else {
+            const indices = [
+              { label: 'Año 1', idx: 12 },
+              { label: 'Año 2', idx: 24 },
+              { label: 'Año 3', idx: 36 },
+              { label: 'Año 4', idx: 48 },
+              { label: 'Año 5', idx: 60 },
+            ];
+            setChartData(
+              indices.map(({ label, idx }) => ({
+                periodo: label,
+                optimista: Math.round(cOpt[idx] ?? capitalBase * Math.pow(1.56, idx / 12)),
+                base: Math.round(cBase[idx] ?? capitalBase * Math.pow(1.30, idx / 12)),
+                pesimista: Math.round(cPes[idx] ?? capitalBase * Math.pow(1.07, idx / 12)),
+              }))
+            );
+          }
+          return;
+        }
+      } catch (e) {
+        console.warn('[ProfitProjectionsChart] Error cargando proyecciones del backend:', e);
+      }
+
+      // Fallback dinámico si no hay respuesta del backend
+      if (horizonte === '1_ANO') {
+        setChartData([
+          { periodo: 'Mes 1', optimista: Math.round(capitalBase * 1.04), base: Math.round(capitalBase * 1.02), pesimista: Math.round(capitalBase * 1.005) },
+          { periodo: 'Mes 3', optimista: Math.round(capitalBase * 1.12), base: Math.round(capitalBase * 1.06), pesimista: Math.round(capitalBase * 1.015) },
+          { periodo: 'Mes 6', optimista: Math.round(capitalBase * 1.25), base: Math.round(capitalBase * 1.14), pesimista: Math.round(capitalBase * 1.03) },
+          { periodo: 'Mes 9', optimista: Math.round(capitalBase * 1.40), base: Math.round(capitalBase * 1.22), pesimista: Math.round(capitalBase * 1.05) },
+          { periodo: 'Mes 12', optimista: Math.round(capitalBase * 1.56), base: Math.round(capitalBase * 1.30), pesimista: Math.round(capitalBase * 1.07) },
+        ]);
+      } else if (horizonte === '3_ANOS') {
+        setChartData([
+          { periodo: 'Año 1', optimista: Math.round(capitalBase * 1.56), base: Math.round(capitalBase * 1.30), pesimista: Math.round(capitalBase * 1.07) },
+          { periodo: 'Año 2', optimista: Math.round(capitalBase * 2.40), base: Math.round(capitalBase * 1.69), pesimista: Math.round(capitalBase * 1.15) },
+          { periodo: 'Año 3', optimista: Math.round(capitalBase * 3.80), base: Math.round(capitalBase * 2.20), pesimista: Math.round(capitalBase * 1.23) },
+        ]);
+      } else {
+        setChartData([
+          { periodo: 'Año 1', optimista: Math.round(capitalBase * 1.56), base: Math.round(capitalBase * 1.30), pesimista: Math.round(capitalBase * 1.07) },
+          { periodo: 'Año 2', optimista: Math.round(capitalBase * 2.40), base: Math.round(capitalBase * 1.69), pesimista: Math.round(capitalBase * 1.15) },
+          { periodo: 'Año 3', optimista: Math.round(capitalBase * 3.80), base: Math.round(capitalBase * 2.20), pesimista: Math.round(capitalBase * 1.23) },
+          { periodo: 'Año 4', optimista: Math.round(capitalBase * 5.90), base: Math.round(capitalBase * 2.85), pesimista: Math.round(capitalBase * 1.31) },
+          { periodo: 'Año 5', optimista: Math.round(capitalBase * 8.50), base: Math.round(capitalBase * 3.70), pesimista: Math.round(capitalBase * 1.40) },
+        ]);
+      }
+    };
+
+    cargarProyecciones();
+    return () => {
+      cancelado = true;
+    };
+  }, [horizonte, capitalBase]);
 
   const formatearMonto = (val) => `$${(val / 1000000).toFixed(0)}M`;
 
@@ -73,7 +151,7 @@ export function ProfitProjectionsChart() {
 
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+          <LineChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#223552' : '#E2E8F0'} />
             <XAxis dataKey="periodo" tick={{ fontSize: 12, fill: isDark ? '#94A3B8' : '#475569' }} />
             <YAxis tickFormatter={formatearMonto} tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#475569' }} />

@@ -10,7 +10,7 @@ import json
 from typing import Any, Dict, Optional, Set
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from src.database.connection import transaction
+from src.database.connection import reset_database, transaction
 from src.database.repositories import balance_repo
 from src.simulation.clock import SimulationClock
 from src.simulation.daily_tick import ejecutar_cierre_diario
@@ -36,17 +36,26 @@ class ConnectionManager:
             self.active_connections.discard(websocket)
 
     async def broadcast(self, message: Dict[str, Any]):
-        """Transmite un mensaje JSON a todas las pantallas conectadas."""
+        """Transmite un mensaje JSON a todas las pantallas conectadas sin bloquear por sockets lentos o huérfanos."""
         encoded = json.dumps(message)
         async with self._lock:
-            desconectados = set()
-            for connection in self.active_connections:
-                try:
-                    await connection.send_text(encoded)
-                except Exception:
-                    desconectados.add(connection)
-            for dead in desconectados:
-                self.active_connections.discard(dead)
+            targets = list(self.active_connections)
+
+        if not targets:
+            return
+
+        async def _enviar_seguro(ws: WebSocket):
+            try:
+                await asyncio.wait_for(ws.send_text(encoded), timeout=2.0)
+                return None
+            except Exception:
+                return ws
+
+        muertos = await asyncio.gather(*[_enviar_seguro(ws) for ws in targets])
+        desconectados = {ws for ws in muertos if ws is not None}
+        if desconectados:
+            async with self._lock:
+                self.active_connections.difference_update(desconectados)
 
 
 manager = ConnectionManager()
@@ -104,7 +113,9 @@ async def _bucle_simulacion_fondo():
                 await asyncio.sleep(0.5)
         except asyncio.CancelledError:
             break
-        except Exception:
+        except Exception as exc:
+            import traceback
+            traceback.print_exc()
             await asyncio.sleep(1.0)
 
 
@@ -176,6 +187,31 @@ async def websocket_simulacion_endpoint(websocket: WebSocket):
 
                     evento = _construir_evento_tick(reloj, nueva_fecha, tick_res, trafico, balance)
                     await manager.broadcast(evento)
+
+                elif accion in ("reset", "reiniciar", "restablecer"):
+                    nueva_fecha = reloj.reiniciar(date(2026, 10, 26))
+                    with transaction() as conn:
+                        reset_database(conn)
+                        balance = balance_repo.obtener_ultimo_balance(conn)
+
+                    est = reloj.obtener_estado()
+                    evento_reset = {
+                        "tipo": "RESET",
+                        "subtipo": "SIMULACION_REINICIADA",
+                        "fecha_simulada": est["fecha_virtual"],
+                        "fecha_virtual": est["fecha_virtual"],
+                        "estado_reloj": est,
+                        "balance": {
+                            "capital_propio": balance.capital_propio_patrimonio if balance else 50000000.0,
+                            "patrimonio_neto": balance.capital_propio_patrimonio if balance else 50000000.0,
+                            "cashflow_seguro": balance.cashflow_seguro_prestable if balance else 57600000.0,
+                            "encaje_bcra": balance.encaje_obligatorio_bcra if balance else 5400000.0,
+                            "depositos_flexibles": balance.total_depositos_flexibles if balance else 18000000.0,
+                            "total_prestado": balance.total_prestado_activo if balance else 0.0,
+                        },
+                        **est,
+                    }
+                    await manager.broadcast(evento_reset)
 
                 elif accion in ("inyectar_trafico", "inject_traffic"):
                     cantidad = max(1, min(15, int(comando.get("cantidad", 5))))

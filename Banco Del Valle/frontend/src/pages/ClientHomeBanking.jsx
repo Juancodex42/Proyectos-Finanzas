@@ -41,6 +41,7 @@ export function ClientHomeBanking({ onGoToDashboard }) {
   };
 
   useEffect(() => {
+    simSocket.connect();
     cargarDatos();
 
     // Suscripción al WebSocket para actualizar saldo en cada tick

@@ -13,7 +13,7 @@
 > [!IMPORTANT]
 > **Naturaleza de la Interfaz & Ejecución:** Este sistema es un motor de **alta concurrencia en línea de comandos (CLI)** y **bandeja del sistema Windows (System Tray)**. **No abre navegador web**, garantizando mínima latencia y bajo consumo de recursos en entornos headless o servidores dedicados.
 >
-> 🚀 **Lanzador 1-Clic para Windows:** Incluye el script interactivo [`BOT_P2P_BINANCE.bat`](BOT_P2P_BINANCE.bat) para seleccionar entre Modo Demo Zero-API, Bot CLI o Bandeja de Sistema.
+> 🚀 **Lanzador 1-Clic para Windows:** Incluye el script interactivo [`INICIAR_MODO_DEMO.bat`](INICIAR_MODO_DEMO.bat) para seleccionar entre Modo Demo Zero-API, Bot CLI o Bandeja de Sistema, y [`INICIAR_BOT_ORIGINAL.bat`](INICIAR_BOT_ORIGINAL.bat) para el arranque directo en producción.
 > 
 > 🔒 **Modo Demo & Seguridad Operativa (Zero-API Sandbox):**
 > - **Sin exposición de claves privadas:** Por estrictas políticas de seguridad y protección de capital, no se incluyen claves reales de Binance API ni tokens de Telegram (`.env.example` provisto).
@@ -231,7 +231,8 @@ Bot P2P Binance/
 │
 ├── .env.example                    # Plantilla de variables de entorno (segura)
 ├── .gitignore                      # Reglas de exclusión de Git (logs, credenciales, SQLite)
-├── iniciar_bot.bat                 # Script de arranque en Windows (1-clic)
+├── INICIAR_BOT_ORIGINAL.bat        # Script de arranque directo del Bot Original (Producción)
+├── INICIAR_MODO_DEMO.bat           # Lanzador interactivo con Modo Demo Zero-API y Tests
 ├── launcher.py                     # Lanzador desacoplado en segundo plano (pythonw)
 ├── main.py                         # Orquestador del loop principal del bot
 ├── pytest.ini                      # Configuración de pruebas automatizadas
@@ -277,10 +278,10 @@ python scripts/verify_connection.py
 ```
 
 ### 5. Iniciar el bot
-- **Lanzador Interactivo en Windows (Recomendado)**:
-  Haz doble clic en [`BOT_P2P_BINANCE.bat`](BOT_P2P_BINANCE.bat) para acceder al panel con menú de opciones (Modo Demo Zero-API, Modo Terminal, Bandeja de Sistema o Pytest).
-- **Modo Producción en segundo plano (Windows System Tray)**:
-  Haz doble clic en `iniciar_bot.bat` o ejecuta:
+- **Lanzador Interactivo y Modo Demo en Windows (Recomendado)**:
+  Haz doble clic en [`INICIAR_MODO_DEMO.bat`](INICIAR_MODO_DEMO.bat) para acceder al panel con menú de opciones (Modo Demo Zero-API, Modo Terminal, Bandeja de Sistema o Pytest).
+- **Modo Original / Producción en segundo plano (Windows System Tray)**:
+  Haz doble clic en [`INICIAR_BOT_ORIGINAL.bat`](INICIAR_BOT_ORIGINAL.bat) o ejecuta:
   ```bash
   python launcher.py
   ```

@@ -5,16 +5,20 @@ import { useTheme } from '../../context/ThemeContext';
 /**
  * LiveRatesChart — Gráfico dinámico del spread de tasas de interés (Adaptado a Dark Mode).
  */
-export function LiveRatesChart() {
+export function LiveRatesChart({ rates }) {
   const { isDark } = useTheme();
 
+  const tnaActiva = rates?.tasa_activa_personal ? rates.tasa_activa_personal * 100 : 60.0;
+  const tnaPf = rates?.tasa_pasiva_plazo_fijo ? rates.tasa_pasiva_plazo_fijo * 100 : 38.0;
+  const tnaFlex = rates?.tasa_pasiva_flexible ? rates.tasa_pasiva_flexible * 100 : 28.5;
+
   const data = [
-    { mes: 'Ene', activa: 65.0, pasivaPf: 38.0, pasivaFlex: 28.5 },
-    { mes: 'Feb', activa: 64.0, pasivaPf: 37.5, pasivaFlex: 28.0 },
-    { mes: 'Mar', activa: 63.5, pasivaPf: 36.8, pasivaFlex: 27.5 },
-    { mes: 'Abr', activa: 62.0, pasivaPf: 36.0, pasivaFlex: 27.0 },
-    { mes: 'May', activa: 61.5, pasivaPf: 35.5, pasivaFlex: 26.5 },
-    { mes: 'Jun', activa: 60.0, pasivaPf: 35.0, pasivaFlex: 26.0 },
+    { mes: 'Ene', activa: +(tnaActiva + 5.0).toFixed(1), pasivaPf: +(tnaPf).toFixed(1), pasivaFlex: +(tnaFlex).toFixed(1) },
+    { mes: 'Feb', activa: +(tnaActiva + 4.0).toFixed(1), pasivaPf: +(tnaPf - 0.5).toFixed(1), pasivaFlex: +(tnaFlex - 0.5).toFixed(1) },
+    { mes: 'Mar', activa: +(tnaActiva + 3.5).toFixed(1), pasivaPf: +(tnaPf - 1.2).toFixed(1), pasivaFlex: +(tnaFlex - 1.0).toFixed(1) },
+    { mes: 'Abr', activa: +(tnaActiva + 2.0).toFixed(1), pasivaPf: +(tnaPf - 2.0).toFixed(1), pasivaFlex: +(tnaFlex - 1.5).toFixed(1) },
+    { mes: 'May', activa: +(tnaActiva + 1.5).toFixed(1), pasivaPf: +(tnaPf - 2.5).toFixed(1), pasivaFlex: +(tnaFlex - 2.0).toFixed(1) },
+    { mes: 'Actual', activa: +(tnaActiva).toFixed(1), pasivaPf: +(tnaPf).toFixed(1), pasivaFlex: +(tnaFlex).toFixed(1) },
   ];
 
   return (

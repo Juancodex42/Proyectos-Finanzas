@@ -308,21 +308,21 @@ export function HeroBanner({ segmento = 'INDIVIDUOS', onSimulateClick, onDeposit
   const currentSlide = slides[currentIndex] || slides[0];
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-white via-slate-50 to-orange-50/40 dark:from-[#091224] dark:via-[#0F1E38] dark:to-[#162B4E] text-slate-900 dark:text-white rounded-3xl p-8 sm:p-12 mb-12 shadow-xs border border-slate-200 dark:border-valle-darkBorder transition-colors duration-200">
+    <div className="relative overflow-hidden bg-gradient-to-br from-white via-slate-50 to-orange-50/40 dark:from-[#091224] dark:via-[#0F1E38] dark:to-[#162B4E] text-slate-900 dark:text-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 lg:p-12 shadow-xs border border-slate-200 dark:border-valle-darkBorder transition-colors duration-200">
       {/* Patrón decorativo de fondo */}
       <div className="absolute inset-0 opacity-15 dark:opacity-10 bg-[radial-gradient(#FF7A00_1px,transparent_1px)] [background-size:18px_18px] pointer-events-none" />
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center">
         {/* Columna Izquierda: Mensaje y Acciones */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-4 sm:space-y-6">
           {/* Badge Institucional */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 dark:bg-valle-orange/20 border border-orange-200 dark:border-valle-orange/40 text-valle-orangedark dark:text-valle-orangelight text-xs sm:text-sm font-bold uppercase tracking-wider">
-            <Sparkles className="w-4 h-4 text-valle-orange" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 dark:bg-valle-orange/20 border border-orange-200 dark:border-valle-orange/40 text-valle-orangedark dark:text-valle-orangelight text-xs sm:text-sm font-bold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 text-valle-orange" />
             <span>{isIndividuo ? 'Banca para Familias & Hogares' : 'Banca Corporativa & PyMEs'}</span>
           </div>
 
           {/* Título Principal */}
-          <h1 className="font-display font-extrabold text-3xl sm:text-5xl lg:text-6xl leading-[1.15] tracking-tight text-slate-900 dark:text-white">
+          <h1 className="font-display font-extrabold text-2xl sm:text-4xl lg:text-5xl leading-tight tracking-tight text-slate-900 dark:text-white">
             {isIndividuo ? (
               <>
                 El sueño de tu casa, tu auto y tu futuro,{' '}
@@ -337,18 +337,18 @@ export function HeroBanner({ segmento = 'INDIVIDUOS', onSimulateClick, onDeposit
           </h1>
 
           {/* Subtítulo Cómodo (16px base) */}
-          <p className="text-slate-700 dark:text-slate-200 text-base sm:text-lg leading-relaxed font-normal max-w-2xl">
+          <p className="text-slate-700 dark:text-slate-200 text-sm sm:text-base lg:text-lg leading-relaxed font-normal max-w-2xl">
             {isIndividuo
               ? 'Accedé a préstamos personales y prendarios con cuotas fijas bajo Sistema Francés. Conocé tu tasa personalizada consultando con tu DNI en tiempo real.'
               : 'Líneas de crédito para adquisición de maquinaria pesada, camiones de logística y capital de trabajo. Cuentas remuneradas de tesorería y plazos fijos mayoristas.'}
           </p>
 
           {/* Botones de Acción Rápida (CTA) */}
-          <div className="flex flex-wrap items-center gap-4 pt-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1 sm:pt-2">
             <button
               type="button"
               onClick={onSimulateClick}
-              className="px-7 py-3.5 bg-valle-orange hover:bg-valle-orangedark text-white font-bold text-base rounded-xl shadow-md transition flex items-center gap-2 group"
+              className="px-6 py-3 bg-valle-orange hover:bg-valle-orangedark text-white font-bold text-sm sm:text-base rounded-xl shadow-md transition flex items-center justify-center gap-2 group"
             >
               <span>{isIndividuo ? 'Simular Préstamo Familiar' : 'Simular Crédito PyME'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -357,7 +357,7 @@ export function HeroBanner({ segmento = 'INDIVIDUOS', onSimulateClick, onDeposit
             <button
               type="button"
               onClick={onDepositClick}
-              className="px-6 py-3.5 bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 text-slate-800 dark:text-white font-semibold text-base rounded-xl border border-slate-300 dark:border-white/20 shadow-xs transition flex items-center gap-2"
+              className="px-5 py-3 bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 text-slate-800 dark:text-white font-semibold text-sm sm:text-base rounded-xl border border-slate-300 dark:border-white/20 shadow-xs transition flex items-center justify-center gap-2"
             >
               <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <span>Invertir al 28.5% TNA</span>
@@ -365,18 +365,18 @@ export function HeroBanner({ segmento = 'INDIVIDUOS', onSimulateClick, onDeposit
           </div>
 
           {/* Micro-Badges de Confianza */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-6 border-t border-slate-200 dark:border-valle-darkBorder text-xs sm:text-sm">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 sm:pt-6 border-t border-slate-200 dark:border-valle-darkBorder text-xs sm:text-sm">
             <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium">
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Consulta de Calificación en Línea</span>
+              <span>Calificación en Línea</span>
             </div>
             <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium">
               <ShieldCheck className="w-4 h-4 text-valle-orange" />
-              <span>Supervisado por el BCRA</span>
+              <span>Supervisado BCRA</span>
             </div>
             <div className="hidden sm:flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium">
               <Home className="w-4 h-4 text-valle-blue dark:text-sky-300" />
-              <span>Raíz en el Valle Catamarqueño</span>
+              <span>Valle Catamarqueño</span>
             </div>
           </div>
         </div>
@@ -387,9 +387,9 @@ export function HeroBanner({ segmento = 'INDIVIDUOS', onSimulateClick, onDeposit
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-valle-darkBorder bg-slate-900">
+          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border-2 sm:border-4 border-white dark:border-valle-darkBorder bg-slate-900">
             {/* Imagen Activa con Transición Suave */}
-            <div className="relative w-full h-88 sm:h-96 lg:h-[420px] overflow-hidden bg-slate-900">
+            <div className="relative w-full h-64 sm:h-96 lg:h-[420px] overflow-hidden bg-slate-900">
               <img
                 key={currentSlide.id}
                 src={currentSlide.url}

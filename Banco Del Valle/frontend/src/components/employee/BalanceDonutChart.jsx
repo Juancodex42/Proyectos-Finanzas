@@ -7,9 +7,9 @@ import { useTheme } from '../../context/ThemeContext';
  */
 export function BalanceDonutChart({ kpis }) {
   const { isDark } = useTheme();
-  const cartera = kpis?.total_prestado_activo || 22000000;
-  const encaje = kpis?.encaje_obligatorio_bcra || 4500000;
-  const liquidez = kpis?.cashflow_seguro_prestable || 18500000;
+  const cartera = Number(kpis?.total_prestado_activo ?? 0);
+  const encaje = Number(kpis?.encaje_obligatorio_bcra ?? 5400000);
+  const liquidez = Number(kpis?.cashflow_seguro_prestable ?? 50000000);
 
   const data = [
     { name: 'Cartera Préstamos', value: cartera, color: '#FF7A00' },
@@ -17,7 +17,7 @@ export function BalanceDonutChart({ kpis }) {
     { name: 'Liquidez Disponible', value: liquidez, color: isDark ? '#38BDF8' : '#0F3A5D' },
   ];
 
-  const total = cartera + encaje + liquidez;
+  const total = Math.max(1, cartera + encaje + liquidez);
 
   const formatearPesos = (val) =>
     new Intl.NumberFormat('es-AR', {

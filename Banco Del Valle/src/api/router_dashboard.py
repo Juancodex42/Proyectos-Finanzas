@@ -4,7 +4,7 @@ Expone métricas ejecutivas ALM, proyecciones P&L, cartera activa y reportes.
 Referencia de diseño: docs/margen_financiero_y_proyecciones_escenarios.md
 """
 
-from datetime import date
+from datetime import date, timedelta
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Header, HTTPException, Query, Response, status
 
@@ -17,7 +17,7 @@ from src.config import (
     TNA_PLAZO_FIJO_BASE,
     TNA_PRESTAMO_PERSONAL_BASE,
 )
-from src.database.connection import get_db_connection
+from src.database.connection import get_db_connection, reset_database
 from src.database.repositories import (
     balance_repo,
     cuenta_repo,
@@ -26,10 +26,13 @@ from src.database.repositories import (
     prestamo_repo,
 )
 from src.domain.interest_rate import calcular_cuota_frances
+from src.domain.models import BalancePatrimonio
 from src.domain.treasury import (
+    calcular_cashflow_seguro,
     calcular_encaje_requerido,
     proyectar_patrimonio_escenario,
 )
+from src.simulation.clock import SimulationClock
 from src.services.export_service import (
     exportar_a_csv,
     exportar_a_excel,
@@ -72,7 +75,21 @@ def obtener_kpis_gerenciales():
         )
 
         capital = ultimo_b.capital_propio_patrimonio if ultimo_b else CAPITAL_PATRIMONIO_INICIAL
-        cashflow = ultimo_b.cashflow_seguro_prestable if ultimo_b else 50000000.0
+        
+        balance_vivo = BalancePatrimonio(
+            fecha_corte=ultimo_b.fecha_corte if ultimo_b else date.today().isoformat(),
+            total_depositos_plazo_fijo=total_pf,
+            total_depositos_flexibles=total_flex,
+            encaje_obligatorio_bcra=encaje_exigido,
+            capital_propio_patrimonio=capital,
+            total_prestado_activo=total_prestado,
+            cashflow_seguro_prestable=0.0,
+        )
+        cashflow = calcular_cashflow_seguro(
+            balance=balance_vivo,
+            alicuota_flex=ENCAJE_FLEXIBLE_PCT,
+            alicuota_pf=ENCAJE_PLAZO_FIJO_PCT,
+        )
 
         prestamos_activos = prestamo_repo.obtener_prestamos_activos(conn)
         en_mora = sum(1 for p in prestamos_activos if p.estado.value == "EN_MORA")
@@ -95,6 +112,92 @@ def obtener_kpis_gerenciales():
         }
     finally:
         conn.close()
+
+
+@router.get("/api/dashboard/alm-gaps")
+def obtener_brechas_alm():
+    """
+    Retorna la estructura de descalce de plazos y brechas temporales (ALM).
+    Compara cobranzas proyectadas de cuotas vs vencimientos de depósitos a 30, 60 y 90 días.
+    """
+    conn = get_db_connection()
+    try:
+        reloj = SimulationClock.get_instance()
+        f_base = reloj.fecha_actual
+        cursor = conn.cursor()
+
+        tramos = [
+            ("30 Días", f_base, f_base + timedelta(days=30), 0.10),
+            ("60 Días", f_base + timedelta(days=31), f_base + timedelta(days=60), 0.05),
+            ("90 Días", f_base + timedelta(days=61), f_base + timedelta(days=90), 0.02),
+        ]
+
+        # Saldo flexible para ponderación de volatilidad
+        total_flex = cuenta_repo.sumar_saldos_cuentas_flexibles(conn)
+
+        resultado = []
+        for nombre, d_inicio, d_fin, pct_flex_volatilidad in tramos:
+            s_ini = d_inicio.isoformat()
+            s_fin = d_fin.isoformat()
+
+            # Cobranzas de préstamos activos en el tramo
+            cursor.execute(
+                """
+                SELECT COALESCE(SUM(c.monto_cuota), 0.0)
+                FROM cuotas c
+                JOIN prestamos p ON c.prestamo_id = p.id
+                WHERE c.fecha_pago IS NULL 
+                  AND p.estado IN ('ACTIVO', 'AL_DIA', 'EN_MORA')
+                  AND c.fecha_vencimiento BETWEEN ? AND ?
+                """,
+                (s_ini, s_fin),
+            )
+            cobranzas_cuotas = float(cursor.fetchone()[0] or 0.0)
+
+            # Vencimientos de plazos fijos en el tramo
+            cursor.execute(
+                """
+                SELECT COALESCE(SUM(monto_depositado + intereses_a_generar), 0.0)
+                FROM plazos_fijos
+                WHERE estado = 'ACTIVO' AND fecha_vencimiento BETWEEN ? AND ?
+                """,
+                (s_ini, s_fin),
+            )
+            vencimientos_pf = float(cursor.fetchone()[0] or 0.0)
+
+            # Volatilidad estimada de depósitos vista como pasivo exigible
+            vencimiento_total = vencimientos_pf + (total_flex * pct_flex_volatilidad)
+
+            resultado.append({
+                "tramo": nombre,
+                "cobranzas": round(cobranzas_cuotas, 2),
+                "vencimientos": round(vencimiento_total, 2),
+            })
+
+        return resultado
+    finally:
+        conn.close()
+
+
+@router.post("/api/dashboard/simulacion/reset")
+@router.post("/api/simulacion/reset")
+def reset_simulacion_http():
+    """Restablece el reloj virtual de simulación y la base de datos a su estado inicial limpio."""
+    reloj = SimulationClock.get_instance()
+    reloj.reiniciar(date(2026, 10, 26))
+    conn = get_db_connection()
+    try:
+        reset_database(conn)
+        ultimo_b = balance_repo.obtener_ultimo_balance(conn)
+        return {
+            "exito": True,
+            "mensaje": "Simulación y base de datos restablecidas al estado inicial.",
+            "fecha_simulada": "2026-10-26",
+            "capital_propio": ultimo_b.capital_propio_patrimonio if ultimo_b else 50000000.0,
+        }
+    finally:
+        conn.close()
+
 
 
 @router.get("/api/dashboard/live-rates")

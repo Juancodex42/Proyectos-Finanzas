@@ -287,3 +287,36 @@ def init_db(db_path: Optional[str] = None, seed_demo: bool = True) -> None:
 
         if seed_demo:
             seed_initial_data(conn)
+
+
+def reset_database(conn: Optional[sqlite3.Connection] = None, db_path: Optional[str] = None) -> None:
+    """Restablece la base de datos eliminando operaciones simuladas y resembrando el estado inicial limpio."""
+    with transaction(conn=conn, db_path=db_path) as c:
+        c.execute("PRAGMA foreign_keys = OFF;")
+        tablas = [
+            "auditoria_accesos",
+            "movimientos_cuenta",
+            "cuotas",
+            "prestamos",
+            "plazos_fijos",
+            "historial_veraz_externo",
+            "cuentas_transaccionales",
+            "usuarios_credenciales",
+            "proyecciones_inflacion",
+            "proyecciones_actividad_economica",
+            "balance_patrimonio_banco",
+            "personas",
+            "empresas",
+        ]
+        for t in tablas:
+            try:
+                c.execute(f"DELETE FROM {t};")
+            except sqlite3.OperationalError:
+                pass
+        try:
+            c.execute("DELETE FROM sqlite_sequence;")
+        except sqlite3.OperationalError:
+            pass
+        c.execute("PRAGMA foreign_keys = ON;")
+        seed_initial_data(c)
+

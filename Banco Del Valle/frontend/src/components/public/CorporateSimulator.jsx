@@ -31,21 +31,21 @@ export function CorporateSimulator({ onOpenRegister, onExportModal }) {
     }).format(val || 0);
 
   return (
-    <div id="simulador-empresas" className="valle-card p-6 sm:p-10 mb-12 rounded-3xl transition-colors duration-200">
-      <div className="pb-6 mb-8 border-b border-slate-200 dark:border-valle-darkBorder">
-        <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-valle-blue dark:text-sky-300 mb-1.5">
+    <div id="simulador-empresas" className="valle-card p-4 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl transition-colors duration-200">
+      <div className="pb-4 sm:pb-6 mb-6 sm:mb-8 border-b border-slate-200 dark:border-valle-darkBorder">
+        <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-valle-blue dark:text-sky-300 mb-1">
           <Building2 className="w-4 h-4 text-valle-orange" />
           <span>Línea Productiva Corporativa</span>
         </div>
-        <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-white">
+        <h2 className="font-display font-extrabold text-xl sm:text-3xl text-slate-900 dark:text-white">
           Simulador de Financiamiento para PyMEs
         </h2>
-        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-1">
+        <p className="text-xs sm:text-base text-slate-600 dark:text-slate-300 mt-1">
           Crédito para inversión productiva, galpones industriales, flotas y capital de trabajo.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
         {/* Controles PyME */}
         <div className="lg:col-span-7 space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

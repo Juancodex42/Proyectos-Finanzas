@@ -54,7 +54,7 @@ El sistema resuelve la necesidad de proveer liquidez bidireccional continua (com
 | `strategies/` | Optimización Estratégica | Módulos de optimización y análisis predictivo basados en el histórico de trades (`optimizer.py`). |
 | `telegram_bot/` | Telemetría y C2 | Servidor de bot de Telegram interactivo con teclados en línea (*Inline Keyboards*), dashboards actualizables en vivo y formateadores de mensajes en Markdown v1/v2. |
 | `tests/` | Calidad y Regresión | Suite completa de más de 20 archivos de pruebas automatizadas (`pytest` / `unittest`) que validan el comportamiento unitario, concurrencia y parches críticos con simulación (*mocking*). |
-| Archivos raíz | Bootstrap y Orquestación | Contiene el lanzador desacoplado (`launcher.py`), el daemon de bandeja (`tray_app.py`), el orquestador del loop (`main.py`) y el ejecutable por lotes (`iniciar_bot.bat`). |
+| Archivos raíz | Bootstrap y Orquestación | Contiene el lanzador desacoplado (`launcher.py`), el daemon de bandeja (`tray_app.py`), el orquestador del loop (`main.py`) y los ejecutables por lotes (`INICIAR_BOT_ORIGINAL.bat` e `INICIAR_MODO_DEMO.bat`). |
 
 ---
 

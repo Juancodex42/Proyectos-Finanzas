@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Play, Pause, FastForward, SkipForward, Users, Clock } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Play, Pause, FastForward, SkipForward, Users, Clock, RotateCcw } from 'lucide-react';
 import { simSocket } from '../../services/simSocket';
 
 /**
@@ -9,6 +9,8 @@ export function SimController({ onTickUpdate }) {
   const [fechaVirtual, setFechaVirtual] = useState('2026-10-26');
   const [corriendo, setCorriendo] = useState(false);
   const [velocidad, setVelocidad] = useState(1);
+  const [confirmandoReset, setConfirmandoReset] = useState(false);
+  const resetTimerRef = useRef(null);
 
   useEffect(() => {
     simSocket.connect();
@@ -18,13 +20,20 @@ export function SimController({ onTickUpdate }) {
         msg.tipo === 'CONEXION_ESTABLECIDA' ||
         msg.tipo === 'ESTADO_SIMULACION' ||
         msg.tipo === 'ESTADO_INICIAL' ||
-        msg.tipo === 'ESTADO_RELOJ'
+        msg.tipo === 'ESTADO_RELOJ' ||
+        msg.tipo === 'RESET'
       ) {
         const fv = msg.fecha_virtual || msg.fecha_simulada || msg.estado_reloj?.fecha_simulada;
         if (fv) setFechaVirtual(fv);
         if (msg.corriendo !== undefined) setCorriendo(msg.corriendo);
         else if (msg.en_pausa !== undefined) setCorriendo(!msg.en_pausa);
         if (msg.velocidad !== undefined) setVelocidad(msg.velocidad);
+
+        if (msg.tipo === 'RESET') {
+          setCorriendo(false);
+          setConfirmandoReset(false);
+          if (onTickUpdate) onTickUpdate(msg);
+        }
       } else if (msg.tipo === 'TICK_DIARIO' || msg.tipo === 'TICK') {
         const fv = msg.fecha_virtual || msg.fecha_simulada;
         if (fv) setFechaVirtual(fv);
@@ -32,7 +41,10 @@ export function SimController({ onTickUpdate }) {
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    };
   }, []);
 
   const handleToggle = () => {
@@ -60,6 +72,22 @@ export function SimController({ onTickUpdate }) {
 
   const handleInyectarTrafico = () => {
     simSocket.inyectarTrafico(5);
+  };
+
+  const handleReset = () => {
+    if (!confirmandoReset) {
+      setConfirmandoReset(true);
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = setTimeout(() => {
+        setConfirmandoReset(false);
+      }, 3500);
+      return;
+    }
+
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    setConfirmandoReset(false);
+    setCorriendo(false);
+    simSocket.reiniciar();
   };
 
   return (
@@ -150,6 +178,20 @@ export function SimController({ onTickUpdate }) {
         >
           <Users className="w-4 h-4" />
           <span className="hidden sm:inline">+5 Solicitudes de Crédito</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleReset}
+          title="Restablecer simulación al Día 1 y reiniciar datos del banco"
+          className={`px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition border ${
+            confirmandoReset
+              ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-500 animate-pulse shadow-lg'
+              : 'bg-slate-800/80 hover:bg-rose-950/60 text-slate-300 hover:text-rose-300 border-slate-700 hover:border-rose-500/50'
+          }`}
+        >
+          <RotateCcw className={`w-4 h-4 ${confirmandoReset ? 'animate-spin' : ''}`} />
+          <span>{confirmandoReset ? '¿Confirmar Reset?' : 'Reset'}</span>
         </button>
       </div>
     </div>

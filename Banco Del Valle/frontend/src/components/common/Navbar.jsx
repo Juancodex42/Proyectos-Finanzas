@@ -20,8 +20,8 @@ export function Navbar({
 
   return (
     <header className="sticky top-0 z-40 bg-white dark:bg-valle-darkSurface border-b border-slate-200 dark:border-valle-darkBorder shadow-xs transition-colors duration-200">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 xl:px-12">
-        <div className="flex items-center justify-between h-20 gap-4">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-8 xl:px-12">
+        <div className="flex items-center justify-between h-16 sm:h-20 gap-3 sm:gap-4">
           
           {/* Logo Corporativo e Isotipo B+V */}
           <div
@@ -36,7 +36,8 @@ export function Navbar({
               }
             }}
           >
-            <BrandLogo size="lg" variant={isDark ? 'light' : 'dark'} />
+            <BrandLogo size="md" className="sm:hidden" variant={isDark ? 'light' : 'dark'} />
+            <BrandLogo size="lg" className="hidden sm:flex" variant={isDark ? 'light' : 'dark'} />
           </div>
 
           {/* Navegación Central Dinámica según Estado de Autenticación y Rol */}
@@ -205,6 +206,38 @@ export function Navbar({
 
         </div>
       </div>
+
+      {/* Selector de Segmento Exclusivo para Móviles (Familias vs Empresas) */}
+      {!isAuthenticated && activeView === 'home' && (
+        <div className="flex md:hidden items-center justify-center py-2 px-3 border-t border-slate-200/80 dark:border-valle-darkBorder bg-slate-50/90 dark:bg-valle-darkSurface/90">
+          <div className="grid grid-cols-2 w-full max-w-sm bg-slate-200/70 dark:bg-valle-darkElevated p-1 rounded-xl">
+            <button
+              type="button"
+              onClick={() => setSegmento('INDIVIDUOS')}
+              className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                segmento === 'INDIVIDUOS'
+                  ? 'bg-valle-orange text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
+              }`}
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span>Familias</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSegmento('EMPRESAS')}
+              className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                segmento === 'EMPRESAS'
+                  ? 'bg-valle-orange text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Empresas</span>
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

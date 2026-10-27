@@ -35,7 +35,8 @@ Bot P2P Binance/
 │   │   └── schema.py                   # DDL SQLite e índices optimizados
 │   └── telegram_bot/                   # Interfaz de telemetría y control remoto
 ├── tests/                              # Suite de 210 pruebas unitarias deterministas
-├── BOT_P2P_BINANCE.bat                 # Lanzador 1-Click interactivo con Modo Demo
+├── INICIAR_BOT_ORIGINAL.bat            # Script de arranque directo del Bot Original (Producción)
+├── INICIAR_MODO_DEMO.bat               # Lanzador 1-Click interactivo con Modo Demo y Tests
 ├── main.py                             # Loop principal de ejecución
 ├── launcher.py                         # Menú CLI interactivo
 ├── tray_app.py                         # Monitor de bandeja de sistema (Windows Tray)
@@ -50,14 +51,14 @@ Bot P2P Binance/
 Ejecuta la microestructura completa del motor P2P en memoria sin requerir saldo ni credenciales de Binance:
 ```bash
 python scripts/run_demo_showcase.py
-# O simplemente doble clic en BOT_P2P_BINANCE.bat y elegir opción [1]
+# O simplemente doble clic en INICIAR_MODO_DEMO.bat y presionar Enter
 ```
 
 ### 2. Ejecución de la Suite de Pruebas Unitarias (Pytest)
 Suite completa de 210 pruebas deterministas y 100% offline:
 ```bash
 python -m pytest tests -v
-# O vía BOT_P2P_BINANCE.bat opción [5]
+# O vía INICIAR_MODO_DEMO.bat opción [5]
 ```
 
 ### 3. Ejecución en Producción / Paper

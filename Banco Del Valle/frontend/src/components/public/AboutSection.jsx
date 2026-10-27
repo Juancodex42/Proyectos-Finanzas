@@ -24,8 +24,8 @@ export function AboutSection() {
   ];
 
   return (
-    <section id="nosotros" className="my-16">
-      <div className="text-center max-w-2xl mx-auto mb-12">
+    <section id="nosotros" className="my-6 sm:my-12">
+      <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-10">
         <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-valle-orange">
           Identidad y Compromiso Regional
         </span>

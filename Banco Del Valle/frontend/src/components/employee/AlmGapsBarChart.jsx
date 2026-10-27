@@ -5,14 +5,16 @@ import { useTheme } from '../../context/ThemeContext';
 /**
  * AlmGapsBarChart — Descalce de plazos ALM y brechas temporales de liquidez (Adaptado a Dark Mode).
  */
-export function AlmGapsBarChart() {
+export function AlmGapsBarChart({ data: propData }) {
   const { isDark } = useTheme();
 
-  const data = [
-    { tramo: '30 Días', cobranzas: 5200000, vencimientos: 3100000 },
-    { tramo: '60 Días', cobranzas: 4800000, vencimientos: 2900000 },
-    { tramo: '90 Días', cobranzas: 6100000, vencimientos: 4500000 },
+  const fallbackData = [
+    { tramo: '30 Días', cobranzas: 0, vencimientos: 1800000 },
+    { tramo: '60 Días', cobranzas: 0, vencimientos: 900000 },
+    { tramo: '90 Días', cobranzas: 0, vencimientos: 360000 },
   ];
+
+  const data = Array.isArray(propData) && propData.length > 0 ? propData : fallbackData;
 
   const formatearMonto = (val) => `$${(val / 1000000).toFixed(1)}M`;
 

@@ -75,6 +75,15 @@ class SimulationClock:
         with self._mutex:
             self._fecha_actual = nueva_fecha
 
+    def reiniciar(self, fecha_inicial: Optional[date] = None) -> date:
+        """Restablece el reloj virtual a la fecha inicial, pausa y pone a cero los días transcurridos."""
+        with self._mutex:
+            self._fecha_actual = fecha_inicial or date(2026, 10, 26)
+            self._en_pausa = True
+            self._segundos_por_dia = 1.0
+            self._contador_dias_simulados = 0
+            return self._fecha_actual
+
     def pausar(self) -> None:
         """Detiene el avance automático del reloj."""
         with self._mutex:

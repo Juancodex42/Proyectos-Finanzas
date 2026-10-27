@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Clock, AlertTriangle, CheckCircle2, ArrowRight, Loader2, RefreshCw } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
 
@@ -13,14 +13,23 @@ export function FixedTermModal({
   plazosFijos = [],
   onUpdateSuccess,
 }) {
-  const [monto, setMonto] = useState(1000000);
+  const [monto, setMonto] = useState(() => Math.min(1000000, Math.max(50000, saldoDisponible)));
   const [dias, setDias] = useState(30);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      setMonto(Math.min(1000000, Math.max(50000, saldoDisponible)));
+      setError(null);
+      setSuccess(null);
+    }
+  }, [isOpen, saldoDisponible]);
+
   if (!isOpen) return null;
 
+  const saldoInsuficienteParaMinimo = saldoDisponible < 50000;
   const tna = 0.38; // 38%
   const gananciaEstimada = monto * (tna / 365) * dias;
 
@@ -29,6 +38,10 @@ export function FixedTermModal({
     if (!personaId) return;
     if (monto > saldoDisponible) {
       setError('El monto supera tu saldo disponible en cuenta');
+      return;
+    }
+    if (monto < 50000) {
+      setError('El monto mínimo para constituir un plazo fijo es de $50.000');
       return;
     }
 
@@ -107,9 +120,14 @@ export function FixedTermModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Monto a Invertir ($)
-                </label>
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Monto a Invertir ($)
+                  </label>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Máx: {formatearPesos(saldoDisponible)}
+                  </span>
+                </div>
                 <input
                   type="number"
                   min="50000"
@@ -118,6 +136,15 @@ export function FixedTermModal({
                   onChange={(e) => setMonto(Number(e.target.value))}
                   className="w-full text-sm px-3.5 py-2.5 border border-slate-300 dark:border-valle-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-valle-orange font-mono bg-white dark:bg-valle-darkSurface text-slate-900 dark:text-slate-100"
                 />
+                {saldoInsuficienteParaMinimo ? (
+                  <span className="text-[11px] text-red-500 font-medium block mt-1">
+                    ⚠️ Saldo insuficiente para el mínimo de $50.000
+                  </span>
+                ) : (
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-1">
+                    Mínimo requerido: $50.000 | Sujeto a débito inmediato
+                  </span>
+                )}
               </div>
 
               <div>
@@ -150,10 +177,16 @@ export function FixedTermModal({
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || saldoInsuficienteParaMinimo || monto > saldoDisponible}
               className="w-full py-3 bg-valle-orange hover:bg-valle-orangedark text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Confirmar Constitución de Plazo Fijo</span>}
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : saldoInsuficienteParaMinimo ? (
+                <span>Saldo Insuficiente (Mínimo $50.000)</span>
+              ) : (
+                <span>Confirmar Constitución de Plazo Fijo</span>
+              )}
             </button>
           </form>
 

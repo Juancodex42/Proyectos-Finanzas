@@ -137,6 +137,7 @@ graph TD
         parsers_other_exchanges_parser["parsers/other_exchanges_parser.py"]
         parsers_parallel_extractor["parsers/parallel_extractor.py"]
         parsers_pdf_cert_helper["parsers/pdf_cert_helper.py"]
+        parsers_pdf_date_helpers["parsers/pdf_date_helpers.py"]
         parsers_pdf_table_extractor["parsers/pdf_table_extractor.py"]
         parsers_ripio_helpers["parsers/ripio_helpers.py"]
         parsers_ripio_parser["parsers/ripio_parser.py"]
@@ -153,11 +154,13 @@ graph TD
         services_bank_persistence_service["services/bank_persistence_service.py"]
         services_bank_reconciliation_service["services/bank_reconciliation_service.py"]
         services_cache_service["services/cache_service.py"]
+        services_cert_excel_cross_audit_service["services/cert_excel_cross_audit_service.py"]
         services_certifications_service["services/certifications_service.py"]
         services_config_service["services/config_service.py"]
         services_exchanges_service["services/exchanges_service.py"]
         services_fifo_service["services/fifo_service.py"]
         services_gap_enrichment_service["services/gap_enrichment_service.py"]
+        services_gap_intervals_service["services/gap_intervals_service.py"]
         services_gap_service["services/gap_service.py"]
         services_monthly_custody_service["services/monthly_custody_service.py"]
         services_operational_excel_service["services/operational_excel_service.py"]
@@ -201,24 +204,26 @@ graph TD
     Browser -- "Llamadas HTTP API" --> app
     db_connection --> DB
     %% Relaciones Dinámicas de Código
-    api_clients_binance_client -.-> compat_db_manager
+    api_clients_binance_client -.-> db_connection
     api_clients_binance_client -.-> models_transaction_models
     api_clients_binance_client -.-> parsers_base_parser
-    api_clients_bitget_client -.-> compat_db_manager
+    api_clients_binance_client -.-> services_exchanges_service
     api_clients_bitget_client -.-> models_transaction_models
     api_clients_bitget_client -.-> parsers_base_parser
+    api_clients_bitget_client -.-> services_exchanges_service
     api_clients_bitso_client -.-> models_transaction_models
-    api_clients_bybit_client -.-> compat_db_manager
     api_clients_bybit_client -.-> models_transaction_models
+    api_clients_bybit_client -.-> services_exchanges_service
     api_clients_common -.-> db_connection
     api_clients_common -.-> models_transaction_models
     api_clients_common -.-> services_tax_service
-    api_clients_manager -.-> compat_db_manager
     api_clients_manager -.-> db_connection
+    api_clients_manager -.-> services_exchanges_service
     api_clients_manager -.-> services_fifo_service
+    api_clients_manager -.-> services_transactions_service
     api_clients_manager -.-> utils_async_helper
-    api_clients_other_clients -.-> compat_db_manager
     api_clients_other_clients -.-> models_transaction_models
+    api_clients_other_clients -.-> services_exchanges_service
     app -.-> compat_db_manager
     app -.-> parsers_pdf_cert_helper
     app -.-> services_auto_sync_daemon
@@ -239,6 +244,7 @@ graph TD
     compat_pdf_table_extractor -.-> parsers_pdf_table_extractor
     compat_reconciliation -.-> services_reconciliation_service
     compat_status_cache -.-> utils_status_cache
+    conftest -.-> compat_db_manager
     db_connection -.-> models_transaction_models
     db_connection -.-> services_certifications_service
     exceptions -.-> utils_exceptions
@@ -293,8 +299,8 @@ graph TD
     parsers_other_exchanges_parser -.-> utils_exceptions
     parsers_parallel_extractor -.-> parsers_deskew_helper
     parsers_parallel_extractor -.-> parsers_ocr_helper
-    parsers_pdf_cert_helper -.-> compat_db_manager
     parsers_pdf_cert_helper -.-> parsers_ocr_helper
+    parsers_pdf_cert_helper -.-> services_transactions_service
     parsers_pdf_table_extractor -.-> models_transaction_models
     parsers_pdf_table_extractor -.-> parsers_ocr_helper
     parsers_pdf_table_extractor -.-> parsers_parallel_extractor
@@ -325,12 +331,14 @@ graph TD
     routes_reconciliation_bp -.-> services_bank_persistence_service
     routes_reconciliation_bp -.-> services_bank_reconciliation_service
     routes_reconciliation_bp -.-> services_cache_service
+    routes_reconciliation_bp -.-> services_cert_excel_cross_audit_service
     routes_reconciliation_bp -.-> services_certifications_service
     routes_reports_bp -.-> compat_api_manager
     routes_reports_bp -.-> compat_db_manager
     routes_reports_bp -.-> compat_processor_lib
     routes_reports_bp -.-> compat_reconciliation
     routes_reports_bp -.-> services_cache_service
+    routes_reports_bp -.-> services_cert_excel_cross_audit_service
     routes_reports_bp -.-> services_fifo_service
     routes_reports_helpers -.-> compat_config_manager
     routes_reports_helpers -.-> compat_db_manager
@@ -365,6 +373,9 @@ graph TD
     services_bank_reconciliation_service -.-> db_connection
     services_bank_reconciliation_service -.-> models_operational_models
     services_bank_reconciliation_service -.-> services_bank_persistence_service
+    services_cert_excel_cross_audit_service -.-> db_connection
+    services_cert_excel_cross_audit_service -.-> models_transaction_models
+    services_cert_excel_cross_audit_service -.-> services_fifo_service
     services_certifications_service -.-> db_connection
     services_certifications_service -.-> models_cpa_seed_data
     services_certifications_service -.-> services_cache_service
@@ -380,6 +391,7 @@ graph TD
     services_fifo_service -.-> services_gap_service
     services_gap_enrichment_service -.-> db_connection
     services_gap_enrichment_service -.-> models_transaction_models
+    services_gap_enrichment_service -.-> services_gap_intervals_service
     services_gap_enrichment_service -.-> services_monthly_custody_service
     services_gap_enrichment_service -.-> services_orphan_transfer_service
     services_gap_enrichment_service -.-> services_source_declarations_service
@@ -473,6 +485,7 @@ graph TD
   - `parsers/other_exchanges_parser.py`
   - `parsers/parallel_extractor.py`
   - `parsers/pdf_cert_helper.py`
+  - `parsers/pdf_date_helpers.py`
   - `parsers/pdf_table_extractor.py`
   - `parsers/ripio_helpers.py`
   - `parsers/ripio_parser.py`
@@ -491,11 +504,13 @@ graph TD
   - `services/bank_persistence_service.py`
   - `services/bank_reconciliation_service.py`
   - `services/cache_service.py`
+  - `services/cert_excel_cross_audit_service.py`
   - `services/certifications_service.py`
   - `services/config_service.py`
   - `services/exchanges_service.py`
   - `services/fifo_service.py`
   - `services/gap_enrichment_service.py`
+  - `services/gap_intervals_service.py`
   - `services/gap_service.py`
   - `services/monthly_custody_service.py`
   - `services/operational_excel_service.py`

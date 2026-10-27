@@ -175,3 +175,27 @@ def test_websocket_simulacion_connection_and_advance(api_client):
         assert msg_tick["tipo"] == "TICK"
         assert "fecha_simulada" in msg_tick
         assert "balance" in msg_tick
+
+
+def test_dashboard_alm_gaps(api_client):
+    """Valida que el endpoint /api/dashboard/alm-gaps retorne los 3 tramos de liquidez ALM."""
+    res = api_client.get("/api/dashboard/alm-gaps")
+    assert res.status_code == 200
+    tramos = res.json()
+    assert len(tramos) == 3
+    tramos_nombres = [t["tramo"] for t in tramos]
+    assert tramos_nombres == ["30 Días", "60 Días", "90 Días"]
+    for t in tramos:
+        assert "cobranzas" in t
+        assert "vencimientos" in t
+
+
+def test_dashboard_reset_simulacion(api_client):
+    """Valida el endpoint REST de reseteo de la simulación."""
+    res = api_client.post("/api/dashboard/simulacion/reset")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["exito"] is True
+    assert data["fecha_simulada"] == "2026-10-26"
+    assert data["capital_propio"] == 50000000.0
+

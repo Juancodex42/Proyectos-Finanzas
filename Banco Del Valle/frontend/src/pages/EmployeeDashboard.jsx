@@ -17,18 +17,24 @@ import { ShieldCheck, Download, Loader2 } from 'lucide-react';
 export function EmployeeDashboard() {
   const [kpis, setKpis] = useState(null);
   const [operaciones, setOperaciones] = useState([]);
+  const [almGaps, setAlmGaps] = useState([]);
+  const [liveRates, setLiveRates] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [exportModulo, setExportModulo] = useState('BALANCE');
 
   const recargarMetricas = async () => {
     try {
-      const [resKpis, resOps] = await Promise.all([
+      const [resKpis, resOps, resGaps, resRates] = await Promise.all([
         apiClient.getKpis().catch(() => null),
         apiClient.getOperaciones().catch(() => []),
+        apiClient.getAlmGaps().catch(() => []),
+        apiClient.getLiveRates().catch(() => null),
       ]);
       if (resKpis) setKpis(resKpis);
       if (resOps) setOperaciones(resOps);
+      if (resGaps && resGaps.length) setAlmGaps(resGaps);
+      if (resRates) setLiveRates(resRates);
     } catch (e) {
       console.error('[EmployeeDashboard] Error al recargar métricas:', e);
     } finally {
@@ -39,9 +45,14 @@ export function EmployeeDashboard() {
   useEffect(() => {
     recargarMetricas();
 
-    // Actualización reactiva por cada tick del reloj de simulación
+    // Actualización reactiva por cada tick o reset del reloj de simulación
     const unsubscribe = simSocket.subscribe((msg) => {
-      if (msg.tipo === 'TICK' || msg.tipo === 'TICK_DIARIO' || msg.tipo === 'BALANCE_ACTUALIZADO') {
+      if (
+        msg.tipo === 'TICK' ||
+        msg.tipo === 'TICK_DIARIO' ||
+        msg.tipo === 'BALANCE_ACTUALIZADO' ||
+        msg.tipo === 'RESET'
+      ) {
         recargarMetricas();
       }
     });
@@ -94,13 +105,13 @@ export function EmployeeDashboard() {
       {/* Segmentación Analítica: Fila 1 (Donut de Balance + Barras ALM) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <BalanceDonutChart kpis={kpis} />
-        <AlmGapsBarChart />
+        <AlmGapsBarChart data={almGaps} />
       </div>
 
       {/* Segmentación Analítica: Fila 2 (Proyecciones Multi-Escenario + Spread Fisher) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <ProfitProjectionsChart />
-        <LiveRatesChart />
+        <ProfitProjectionsChart kpis={kpis} />
+        <LiveRatesChart rates={liveRates} />
       </div>
 
       {/* Tabla de Operaciones de Cartera Crediticia */}

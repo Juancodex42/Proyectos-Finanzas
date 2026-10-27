@@ -309,7 +309,8 @@ class TestAdvancedModePanels:
 class TestScriptsAndTags:
     def test_scripts_included_at_end(self, html_content):
         assert '<script src="/static/js/charts.js"></script>' in html_content
-        assert '<script src="/static/js/app.js"></script>' in html_content
+        assert ('<script type="module" src="/static/js/app.js"></script>' in html_content or
+                '<script src="/static/js/app.js"></script>' in html_content)
 
     def test_canvases_count(self, parsed_html):
         canvas_ids = [c.get("id") for c in parsed_html.canvases if "id" in c]

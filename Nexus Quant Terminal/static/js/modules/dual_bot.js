@@ -403,3 +403,8 @@ class DualBotController {
 
 // Instancia global
 window.dualBotController = new DualBotController();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => window.dualBotController.init());
+} else {
+    window.dualBotController.init();
+}

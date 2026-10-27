@@ -63,6 +63,9 @@ class SimulationSocket {
 
   subscribe(listener) {
     this.listeners.add(listener);
+    if (!this.ws || (this.ws.readyState !== WebSocket.OPEN && this.ws.readyState !== WebSocket.CONNECTING)) {
+      this.connect();
+    }
     return () => this.listeners.delete(listener);
   }
 
@@ -102,6 +105,10 @@ class SimulationSocket {
 
   inyectarTrafico(cantidad = 5) {
     this.sendCommand('INYECTAR_TRAFICO', { cantidad });
+  }
+
+  reiniciar() {
+    this.sendCommand('REINICIAR');
   }
 }
 

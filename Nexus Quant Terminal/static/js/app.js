@@ -226,7 +226,7 @@ function switchTab(tabId) {
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.tab === tabId);
     });
-    document.querySelectorAll('.tab-content').forEach(c => {
+    document.querySelectorAll('.tab-pane').forEach(c => {
         c.classList.remove('active');
         if (c.id === tabId) {
             c.classList.add('active');
@@ -340,14 +340,14 @@ async function initApp() {
         const lw = createCandlestickChart('tv-chart');
         if (lw) {
             mainChart = lw.chart;
-            candleSeries = lw.series;
+            candleSeries = lw.candleSeries || lw.series;
             window.mainChart = mainChart;
             window.candleSeries = candleSeries;
         }
         const slw = createCandlestickChart('smart-tv-chart');
         if (slw) {
             smartChart = slw.chart;
-            smartCandleSeries = slw.series;
+            smartCandleSeries = slw.candleSeries || slw.series;
             window.smartChart = smartChart;
             window.smartCandleSeries = smartCandleSeries;
         }
