@@ -1,0 +1,41 @@
+# Ambientes y Credenciales
+.env
+**/.env
+config/.env
+
+# Python y Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+
+# Bases de datos SQLite (operativas y simulaciones)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.db.bak
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Logs de ejecución
+*.log
+bot.log*
+logs/*
+!logs/.gitkeep
+
+# Archivos de trabajo, manuales y depuración temporal
+scratch/
+scratch_convo.txt
+article_raw_script.txt
+faq_360043895111_text.txt
+manuales_api/
+
+# Sistema Operativo / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

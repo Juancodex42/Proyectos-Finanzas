@@ -1,0 +1,247 @@
+# ════════════════════════════════════════════════════════════════
+# BOT V2.0 - CONFIGURACIÓN DE TRADING
+# ════════════════════════════════════════════════════════════════
+
+# PARES DISPONIBLES
+pairs:
+  ETH_USDC:
+    binance_pair: ETHUSDT
+    nombre: Ethereum
+    min_order_size: 0.001
+    tick_size: 0.01
+
+  BTC_USDC:
+    binance_pair: BTCUSDT
+    nombre: Bitcoin
+    min_order_size: 0.0001
+    tick_size: 0.01
+
+  USDT_ARS:
+    binance_pair: USDTARS
+    nombre: Tether
+    min_order_size: 1.0
+    tick_size: 0.01
+
+  USDC_ARS:
+    binance_pair: null
+    nombre: USD Coin
+    min_order_size: 1.0
+    tick_size: 0.01
+
+# COMISIONES RIPIO
+fees:
+  maker: 0.0013  # 0.13%
+  taker: 0.0030  # 0.30%
+
+# ROUTING INTER-EXCHANGE
+routing:
+  # Profit margin mínimo para ejecutar swap
+  min_profit_margin: 1.5  # 1.5x safety (ganancia > 1.5x costo)
+
+  # Red preferida para transfers (trc20 = Tron, más barato)
+  preferred_network: trc20  # Opciones: erc20, trc20, bep20
+
+  # Network fees por token (USD)
+  network_fees:
+    usdt:
+      erc20: 12.0  # Ethereum (caro)
+      trc20: 1.5   # Tron (barato, recomendado)
+      bep20: 1.0   # BSC (barato)
+    usdc:
+      erc20: 10.0
+      trc20: 1.5
+      bep20: 1.0
+
+# CONFIGURACIÓN DE EJECUCIÓN
+execution:
+  max_intentos: 20
+  timeout_orden: 120
+  delay_check_min: 4
+  delay_check_max: 7
+  slippage_maximo: 0.005  # 0.5%
+
+  # Smart Order Sizing
+  max_market_impact: 0.10  # Max 10% de liquidez
+  fragmentar_si_excede: 0.30  # Fragmentar si orden > 30% liquidez
+
+  # TWAP
+  twap_duracion_default: 30  # minutos
+  twap_max_slices: 10
+
+  # Iceberg
+  iceberg_visible_pct: 0.10  # Mostrar 10% del total
+  iceberg_max_visible: 5.0   # Max 5 USDT visible
+
+  # Validaciones
+  validacion_binance_compra: 1.005   # Max +0.5% vs Binance
+  validacion_binance_venta: 0.995    # Max -0.5% vs Binance
+  triple_validacion_delay: 3.0
+
+# GESTIÓN DE CAPITAL
+portfolio:
+  # Límites de exposición
+  max_exposicion_ars_pct: 0.30        # Max 30% en ARS
+  max_exposicion_crypto_pct: 0.20     # Max 20% en BTC/ETH
+  min_stablecoins_pct: 0.50           # Min 50% en USDT/USDC
+  max_desbalance_usdt_usdc_pct: 0.15  # Max 15% diff USDT/USDC
+
+  # Rebalanceo
+  rebalanceo_threshold: 0.10          # Rebalancea si desviación > 10%
+  rebalanceo_auto: true
+
+  # Targets
+  target_usdt_pct: 0.50
+  target_usdc_pct: 0.50
+  target_ars_pct: 0.00
+
+# GESTIÓN DE RIESGO
+risk:
+  # Límites por operación
+  max_perdida_por_operacion_pct: 0.02   # 2%
+  max_posicion_individual_pct: 0.20     # 20%
+  max_exposicion_simultanea_pct: 0.50   # 50%
+
+  # Límites diarios
+  max_perdida_diaria_pct: 0.05          # 5%
+  max_drawdown_pct: 0.15                # 15%
+
+  # Value at Risk
+  var_confianza: 0.95
+  var_limite_pct: 0.02                  # 2%
+
+  # Stops
+  stop_loss_auto: false
+  trailing_stop_pct: 0.03               # 3%
+
+# ESTRATEGIAS
+strategies:
+  # Statistical Arbitrage (Pairs Trading)
+  statistical_arbitrage:
+    enabled: true
+    allocation_pct: 0.40  # 40% del capital
+
+    # Parámetros
+    lookback_days: 30
+    z_score_entry: 2.0
+    z_score_exit: 0.5
+    half_life_min: 10
+    half_life_max: 50
+
+    # Validación
+    cointegration_pvalue_max: 0.05
+    min_probabilidad_reversion: 0.90
+
+    # Scoring
+    score_minimo: 70
+
+  # Market Making
+  market_making:
+    enabled: true
+    allocation_pct: 0.30  # 30% del capital
+
+    # Modelo Avellaneda-Stoikov
+    risk_aversion: 0.1
+    spread_minimo_pct: 0.002   # 0.2%
+    spread_objetivo_pct: 0.004  # 0.4%
+
+    # Gestión de inventario
+    max_inventario_desbalance_pct: 0.30
+    rebalanceo_inventario_threshold: 0.20
+
+    # Timeouts
+    tiempo_max_posicion: 1800  # 30 min
+
+    # Scoring
+    score_minimo: 60
+
+  # Triangular Arbitrage
+  triangular_arbitrage:
+    enabled: true
+    allocation_pct: 0.20  # 20% del capital
+
+    # Costos de transferencia
+    btc_transfer_fee: 0.0001  # BTC
+    eth_transfer_fee: 0.002   # ETH
+    usdt_transfer_fee: 1.0    # USDT
+
+    # Mínimos
+    ganancia_minima_pct: 0.003  # 0.3%
+    score_minimo: 50
+
+  # Volatility Harvesting
+  volatility_harvesting:
+    enabled: false
+    allocation_pct: 0.10  # 10% del capital
+
+    rebalanceo_threshold_pct: 0.005  # 0.5%
+    target_balance: 0.50
+
+# VALIDACIÓN (Monte Carlo, Walk-Forward)
+validation:
+  # Monte Carlo
+  monte_carlo_simulations: 1000
+  monte_carlo_confidence: 0.95
+
+  # Walk-Forward
+  train_window_days: 21
+  test_window_days: 7
+  min_walk_forward_periods: 4
+
+  # Cross-Validation
+  cv_folds: 4
+
+  # Criterios de aprobación
+  sharpe_minimo: 1.5
+  sharpe_objetivo: 2.0
+  max_drawdown_maximo: 0.15
+  win_rate_minimo: 0.55
+  p_value_maximo: 0.05
+  t_stat_minimo: 2.0
+  consistency_minima: 0.75
+
+  # Out-of-sample
+  oos_test_days: 15
+  oos_sharpe_minimo: 1.0
+
+# MONITOREO
+monitoring:
+  check_interval_normal: 30      # segundos
+  check_interval_operando: 8     # segundos
+
+  # Health checks
+  api_health_check_interval: 300  # 5 min
+
+  # Alertas
+  alert_degradacion_threshold: 0.50  # 50% degradación vs backtest
+  alert_sharpe_threshold: 1.0
+
+  # Performance tracking
+  performance_window_trades: 30
+  performance_window_days: 7
+
+# BACKTESTING
+backtesting:
+  min_historical_days: 30
+  slippage_modelo: 0.0005  # 0.05%
+  comision_modelo: 0.0013  # Maker
+
+# PAPER TRADING
+paper_trading:
+  duracion_minima_dias: 7
+  capital_simulado: 10000
+
+# LIVE TRADING
+live_trading:
+  # Escalamiento gradual
+  escalamiento:
+    semana_1: 100
+    semana_2: 250
+    semana_3: 500
+    semana_4: 1000
+    semana_5_mas: 2500
+
+  # Condiciones para iniciar
+  min_paper_trading_sharpe: 2.0
+  min_paper_trading_trades: 100
+  min_paper_trading_winrate: 0.60
+  max_paper_trading_dd: 0.10

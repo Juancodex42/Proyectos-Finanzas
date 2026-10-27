@@ -1,0 +1,334 @@
+<section id="smart-dashboard" class="tab-pane active">
+                <div class="smart-grid">
+                    <!-- Control Bar Horizontal de Optimización -->
+                    <div class="smart-sidebar glass-card">
+                        <div class="smart-header-row">
+                            <div class="smart-title-area">
+                                <h2>⚡ Optimización Inteligente</h2>
+                                <p class="section-desc">
+                                    Ingresa los datos de tu capital y el motor cuantitativo evaluará la estrategia óptima usando algoritmos genéticos y simulaciones Monte Carlo, protegiendo tu capital base con ganancias de arbitraje P2P externo.
+                                </p>
+                            </div>
+                            <div class="smart-action-area">
+                                <button type="button" class="btn-primary" id="btn-smart-run">
+                                    ⚡ Auto-Optimizar Estrategia
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="smart-inputs-container">
+                            <!-- Universo de Activos -->
+                            <div class="smart-universe-wrapper">
+                                <label class="smart-input-label">Universo de Activos (Selecciona al menos 3)</label>
+                                <div class="smart-universe-select">
+                                    <label><input type="checkbox" name="smart-universe" value="WTI" checked> WTI <span class="asset-wr-badge"></span></label>
+                                    <label><input type="checkbox" name="smart-universe" value="NASDAQ" checked> NASDAQ <span class="asset-wr-badge"></span></label>
+                                    <label><input type="checkbox" name="smart-universe" value="GBPJPY" checked> GBPJPY <span class="asset-wr-badge"></span></label>
+                                    <label><input type="checkbox" name="smart-universe" value="XAUUSD" checked> XAUUSD <span class="asset-wr-badge"></span></label>
+                                    <label><input type="checkbox" name="smart-universe" value="DOGEUSDT" checked> DOGEUSDT <span class="asset-wr-badge"></span></label>
+                                    <label><input type="checkbox" name="smart-universe" value="ADAUSDT" checked> ADAUSDT <span class="asset-wr-badge"></span></label>
+                                    <label><input type="checkbox" name="smart-universe" value="BTCUSDT" checked> BTCUSDT <span class="asset-wr-badge"></span></label>
+                                    <label><input type="checkbox" name="smart-universe" value="BNBUSDT" checked> BNBUSDT <span class="asset-wr-badge"></span></label>
+                                    <label><input type="checkbox" name="smart-universe" value="ETHUSDT"> ETHUSDT <span class="asset-wr-badge"></span></label>
+                                </div>
+                            </div>
+                            
+                            <!-- Preset Selector Barbell -->
+                            <div class="smart-preset-wrapper">
+                                <label class="smart-input-label" style="color: var(--accent-primary); font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                                    🎯 Estrategia de Disparo y Presupuesto de Campaña (Configuración Óptima)
+                                    <span class="tooltip">?
+                                        <span class="tooltip-text" style="width: 380px;">
+                                            <strong>Estrategia Barbell (Ciclo Mensual de 30 Días):</strong><br>
+                                            • <strong>Capital Base ($1,000 USD):</strong> Patrimonio principal protegido en arbitraje.<br>
+                                            • <strong>6 Balas de $33.33/mes:</strong> Financiadas por el flujo de ganancias ($200 USD/mes).<br>
+                                            • <strong>Blindaje Patrimonial:</strong> Si se agotan las 6 balas, el trading se pausa hasta el siguiente mes calendario sin comprometer los $1,000 USD.<br>
+                                            • <strong>Trading Clásico:</strong> Ejecución sistemática con Take Profit, Stop Loss y ratios asimétricos.
+                                        </span>
+                                    </span>
+                                </label>
+                                <select id="smart-preset-select" class="form-control">
+                                    <option value="preset_classic_fast" selected>⚡ [FUTUROS APALANCADOS - DUPLICAR EN DÍAS] 2 Campañas de $100 (R:R 1:2.0, 33x-50x) ➔ Meta: +$1,600 USD en 1 a 3 Días</option>
+                                    <option value="preset_200_1">🎯 [Retorno Asimétrico / 1 Bala] 1 Bala de $200 / Mes (Racha N=3) ➔ Ganancia: +$1,066.33 (Capital Final: $2,066 USDT)</option>
+                                    <option value="preset_33_6">🚀 [Distribución Multi-Bala] 6 Balas de $33.33 / Mes (Rachas N=3) ➔ Meta: Duplicación +100% de Patrimonio</option>
+                                    <option value="preset_25_8">⚡ [Conservador / 8 Intentos] 8 Balas de $25.00 / Mes (Rachas N=3) ➔ Meta: Duplicación +100% de Patrimonio</option>
+                                </select>
+                            </div>
+
+                            <!-- Inputs Numéricos en Fila Grid -->
+                            <div class="smart-numeric-inputs">
+                                <div class="control-group">
+                                    <label for="smart-streak-length">Racha (N)</label>
+                                    <input type="number" id="smart-streak-length" value="3" min="1" max="15">
+                                </div>
+                                
+                                <div class="control-group">
+                                    <label for="smart-base-capital">Capital Base ($)
+                                        <span class="tooltip">?
+                                            <span class="tooltip-text">Capital principal a proteger.</span>
+                                        </span>
+                                    </label>
+                                    <input type="number" id="smart-base-capital" value="1000" min="10">
+                                </div>
+                                
+                                <div class="control-group">
+                                    <label for="smart-profit-pct">Rend. Mensual (%)</label>
+                                    <input type="number" id="smart-profit-pct" value="20" min="1" max="100">
+                                </div>
+                                
+                                <div class="control-group">
+                                    <label for="smart-risk-capital">Cap. Riesgo (Arbitraje P2P)
+                                        <span class="tooltip">?
+                                            <span class="tooltip-text">Ganancias obtenidas por arbitraje P2P externo destinadas a arriesgar en la campaña.</span>
+                                        </span>
+                                    </label>
+                                    <input type="number" id="smart-risk-capital" value="200" readonly class="input-readonly">
+                                </div>
+                                
+                                <div class="control-group">
+                                    <label for="smart-attempts">Intentos / Balas (X)</label>
+                                    <input type="number" id="smart-attempts" value="6" min="1" max="50">
+                                </div>
+                                
+                                <div class="control-group">
+                                    <label for="smart-payout">Retorno R:R / Payout
+                                        <span class="tooltip">?
+                                            <span class="tooltip-text">Multiplicador de retorno por trade en el simulador (Trading Clásico o Payout del Broker).</span>
+                                        </span>
+                                    </label>
+                                    <input type="number" id="smart-payout" value="0.85" min="0.1" max="5.0" step="0.01">
+                                </div>
+
+                                <div class="control-group">
+                                    <label for="smart-generations" style="color: var(--accent-purple);">Generaciones
+                                        <span class="tooltip">?
+                                            <span class="tooltip-text">Ciclos evolutivos que correrá el motor genético en Rust.</span>
+                                        </span>
+                                    </label>
+                                    <input type="number" id="smart-generations" value="50" min="5" max="200">
+                                </div>
+
+                                <div class="control-group">
+                                    <label for="smart-population" style="color: var(--accent-purple);">Población
+                                        <span class="tooltip">?
+                                            <span class="tooltip-text">Cantidad de individuos procesados por generación.</span>
+                                        </span>
+                                    </label>
+                                    <input type="number" id="smart-population" value="150" min="10" max="500">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Consola de Progreso Cyberpunk -->
+                        <div class="smart-console-wrapper" id="smart-console-box" style="display: none;">
+                            <div class="console-header">
+                                <span class="console-dot red"></span>
+                                <span class="console-dot yellow"></span>
+                                <span class="console-dot green"></span>
+                                <span class="console-title">PROCESADOR CUANTITATIVO</span>
+                            </div>
+                            <div class="smart-progress-bar-container">
+                                <div class="smart-progress-bar-fill" id="smart-progress-bar-fill"></div>
+                            </div>
+                            <div class="console-body" id="smart-console-logs">
+                                <!-- Logs dynamically added -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tablero de Resultados -->
+                    <div class="smart-results-area">
+                        <!-- Selector de Ranking de Estrategias Optimizadas -->
+                        <div class="top-strategies-wrapper glass-card" id="smart-top-5-box" style="display: none;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                                <h3 style="font-size: 1.18rem; color: var(--accent-purple); font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 0;">
+                                    🏆 Ranking de Estrategias Optimizadas
+                                    <span class="tooltip">?
+                                        <span class="tooltip-text">
+                                            Ranking cuantitativo institucional de todas las estrategias evaluadas con validación Out-Of-Sample (OOS). Haz clic en cualquier tarjeta para actualizar en tiempo real todas las gráficas, métricas, velas con señales y desglose de capital.
+                                        </span>
+                                    </span>
+                                </h3>
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                    <span id="smart-ranking-period-badge" class="badge" style="background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border: 1.5px solid rgba(168, 85, 247, 0.35); font-size: 0.85rem; font-weight: 700; padding: 4px 10px; font-family: var(--font-mono);">📅 5 Años Históricos (OOS)</span>
+                                    <span style="font-size: 0.88rem; color: var(--accent-primary); font-weight: 600;">👈 Selecciona una estrategia para cargar su tablero</span>
+                                </div>
+                            </div>
+                            <div id="smart-top-5-list">
+                                <!-- Dynamic pills -->
+                            </div>
+                        </div>
+
+                        <!-- Recomendación y Escalera -->
+                        <div class="smart-row-top">
+                            <div class="chart-card glass-card smart-card-rec">
+                                <h3 style="color: var(--accent-primary); font-size: 1.15rem; margin-bottom: 12px;">📊 Plan de Operaciones y Métricas Cuantitativas</h3>
+                                <div id="smart-rec-content" class="smart-rec-text">
+                                    <p class="empty-text">Introduce tus datos a la izquierda y presiona "Auto-Optimizar" para ver el plan.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-card glass-card smart-card-ladder">
+                                <h3 style="font-size: 1.15rem; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                                    <span>🪜 Progresión de Operaciones (Gestión de Capital)</span>
+                                    <span class="tooltip">?
+                                        <span class="tooltip-text" style="width: 340px;">
+                                            <strong>¿Qué es la Progresión de Operaciones?</strong><br>
+                                            Es un plan institucional de gestión asimétrica con apalancamiento (Futuros / Perpetuos) para duplicar el patrimonio en 1 a 3 días sin poner en riesgo los $1,000 USD de base.<br><br>
+                                            • <strong>Margen y Apalancamiento:</strong> Cada paso define el margen de cuenta y el apalancamiento exacto (ej. 33x-50x) para capturar ratios 1:2.0.<br>
+                                            • <strong>🛡️ Cuarentena de Capital (Paso 2):</strong> Tras ganar la primera operación, se retira el margen inicial y se piramida únicamente con las ganancias del mercado ($0.00 de riesgo propio).<br>
+                                            • <strong>Racha N:</strong> Número de operaciones consecutivas (típicamente N=2 o N=3) necesarias para completar el ciclo de duplicación.
+                                        </span>
+                                    </span>
+                                </h3>
+                                <div id="smart-ladder-content" style="overflow-y: auto; max-height: 380px;">
+                                    <p class="empty-text">Sin plan activo.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Matriz de Correlación y Activos Seleccionados -->
+                        <div class="smart-row-correlation">
+                            <div class="chart-card glass-card">
+                                <h3 style="font-size: 1.15rem; margin-bottom: 12px; color: var(--accent-primary); display: flex; align-items: center; gap: 8px;">
+                                    🔥 Heatmap de Correlación de Retornos
+                                    <span class="tooltip">?
+                                        <span class="tooltip-text">
+                                            Muestra la relación estadística entre los activos del universo:<br>
+                                            • <strong>1.00</strong>: Se mueven de forma idéntica.<br>
+                                            • <strong>0.00</strong>: Movimiento totalmente independiente.<br>
+                                            • <strong>&lt; 0.40</strong>: Baja correlación (ideal para diversificar los intentos de la racha sin que caigan todos al mismo tiempo).
+                                        </span>
+                                    </span>
+                                </h3>
+                                <div style="flex: 1; min-height: 290px; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
+                                    <canvas id="smart-correlation-canvas" style="width: 100%; height: 290px; min-height: 290px;"></canvas>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-card glass-card">
+                                <h3 style="font-size: 1.15rem; margin-bottom: 12px; color: var(--accent-green); display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="display: flex; align-items: center; gap: 8px;">
+                                        📋 Activos Seleccionados (Filtro &lt; 0.40)
+                                        <span class="tooltip">?
+                                            <span class="tooltip-text">
+                                                Lista de activos filtrados automáticamente por baja correlación. Muestra el rango de fechas históricas evaluadas por activo (~5 años / 1,250 velas diarias).
+                                            </span>
+                                        </span>
+                                    </span>
+                                    <span class="badge" style="background: rgba(255,255,255,0.06); color: var(--text-secondary); border: 1.5px solid var(--border-subtle); font-size: 0.85rem; font-weight: 600; padding: 4px 10px;">📅 Muestra: 2021 - 2026</span>
+                                </h3>
+                                <div style="flex: 1; overflow-y: auto; max-height: 290px;">
+                                    <table class="markov-table" id="smart-selected-assets-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Activo</th>
+                                                <th>Estado</th>
+                                                <th style="text-align: right;">Win Rate OOS</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="smart-selected-assets-body">
+                                            <tr><td colspan="3" class="empty-text">Sin datos</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Gráficas Principales -->
+                        <div class="smart-row-charts">
+                            <!-- Curva de Capital del Backtest -->
+                            <div class="chart-card glass-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                                    <h3 style="font-size: 1.15rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                        📈 Curva de Capital (Evolución de Equity del Sistema)
+                                        <span class="tooltip">?
+                                            <span class="tooltip-text">
+                                                Muestra la evolución del balance de capital a lo largo del backtest histórico multi-activo, reflejando el crecimiento del equity, drawdowns y la gestión de riesgo del sistema.
+                                            </span>
+                                        </span>
+                                    </h3>
+                                    <div class="scale-toggle-group">
+                                        <button type="button" class="scale-toggle-btn active" id="btn-smart-scale-linear" data-scale="linear">Lineal</button>
+                                        <button type="button" class="scale-toggle-btn" id="btn-smart-scale-log" data-scale="log">Logarítmica</button>
+                                    </div>
+                                </div>
+                                <div class="chart-wrapper">
+                                    <canvas id="smart-equity-chart-canvas"></canvas>
+                                </div>
+                            </div>
+                            
+                            <!-- Monte Carlo Campaña -->
+                            <div class="chart-card glass-card">
+                                <h3 style="font-size: 1.15rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                    🎲 Proyección de Crecimiento y Conos de Riesgo (Monte Carlo)
+                                    <span class="tooltip">?
+                                        <span class="tooltip-text">
+                                            Simula 1,000 trayectorias aleatorias de tu capital basándose en la esperanza matemática y distribución empírica de operaciones.<br>
+                                            <strong>Significado de los percentiles (P):</strong><br>
+                                            • <strong>P95 (Verde punteado)</strong>: Escenario muy optimista (el 95% rinde igual o menos).<br>
+                                            • <strong>P75 (Verde claro)</strong>: Escenario favorable (75% por debajo).<br>
+                                            • <strong>P50 (Azul - Mediana)</strong>: Resultado central / el más probable.<br>
+                                            • <strong>P25 (Rojo claro)</strong>: Escenario conservador / menor rendimiento.<br>
+                                            • <strong>P5 (Rojo punteado)</strong>: Escenario de control de riesgo / peor caso (5%).
+                                        </span>
+                                    </span>
+                                </h3>
+                                <div class="chart-wrapper">
+                                    <canvas id="smart-mc-chart-canvas"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Gráfico de Precios con Señales y Markov -->
+                        <div class="smart-row-bottom">
+                            <div class="chart-card glass-card">
+                                <h3 style="font-size: 1.15rem; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                                    <span style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        🕯️ Velas de Precio con Señales:
+                                        <select id="smart-asset-selector" class="form-control" style="width: auto; padding: 6px 14px; font-size: 0.95rem; font-weight: 700;"></select>
+                                    </span>
+                                    <span class="tooltip">?
+                                        <span class="tooltip-text">
+                                            Selecciona libremente cualquiera de los activos analizados para visualizar sus velas de precio 1D y la ubicación de sus señales de entrada (CALL/PUT).
+                                        </span>
+                                    </span>
+                                </h3>
+                                <div class="chart-container" id="smart-tv-chart" style="margin-top: 10px;">
+                                    <div id="smart-tv-chart-empty">
+                                        <p class="empty-text">Sin datos</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-card glass-card">
+                                <h3 style="font-size: 1.15rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                    📊 Matriz de Markov (Estabilidad de Rachas)
+                                    <span class="tooltip">?
+                                        <span class="tooltip-text">
+                                            Calcula la probabilidad condicional de ganar o perder la SIGUIENTE operación dependiendo de si la operación ANTERIOR fue Victoria (Win) o Derrota (Loss).
+                                        </span>
+                                    </span>
+                                </h3>
+                                <div style="flex: 1; overflow-y: auto; width: 100%;">
+                                    <table class="markov-table" id="smart-markov-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Resultado Anterior</th>
+                                                <th style="color: var(--accent-green);">Siguiente: Win (W)</th>
+                                                <th style="color: var(--accent-red);">Siguiente: Loss (L)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td colspan="3" class="empty-text">Sin datos</td></tr>
+                                        </tbody>
+                                    </table>
+                                    <div id="smart-markov-explanation" style="margin-top: 12px; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; padding: 10px 12px; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                                        💡 <em>Muestra la probabilidad de la siguiente operación según el resultado previo.</em>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>

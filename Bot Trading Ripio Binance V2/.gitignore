@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.pytest_cache/
+
+# Credenciales
+.env
+*.key
+*.pem
+
+# Logs
+*.log
+data/logs/*.log
+
+# Reports
+reports/
+
+# Datos
+data/historical/*.csv
+data/state/bot_state.json
+data/state/bot_state_backup_*.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backups
+*.bak
+*.backup

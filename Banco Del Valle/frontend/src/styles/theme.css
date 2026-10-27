@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+  }
+}
+
+/* Custom styled sliders con soporte Dark Mode */
+.slider-valle {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 9px;
+  border-radius: 6px;
+  background: #CBD5E1;
+  outline: none;
+  transition: background 0.2s;
+}
+
+html.dark .slider-valle {
+  background: #1F2E45;
+  border: 1px solid #334866;
+}
+
+.slider-valle::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #FF7A00;
+  cursor: pointer;
+  border: 3px solid #FFFFFF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, background-color 0.15s;
+}
+
+html.dark .slider-valle::-webkit-slider-thumb {
+  border: 3px solid #080D1A;
+  background: #FF8C1A;
+  box-shadow: 0 0 10px rgba(255, 122, 0, 0.6);
+}
+
+.slider-valle::-webkit-slider-thumb:hover {
+  transform: scale(1.18);
+}
+
+/* Bento grid border & adaptabilidad a Modo Noche */
+.bento-card, .valle-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 1rem;
+  box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.05), 0 1px 3px -1px rgba(15, 23, 42, 0.03);
+  transition: all 0.2s ease-in-out;
+}
+
+.bento-card:hover, .valle-card:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 8px 18px -4px rgba(15, 23, 42, 0.08);
+}
+
+html.dark .bento-card, html.dark .valle-card {
+  background: #0F1A2E;
+  border-color: #223552;
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.45);
+}
+
+html.dark .bento-card:hover, html.dark .valle-card:hover {
+  border-color: #38537C;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.65);
+}
+
+/* Tabular numbers for financial tables */
+.tabular-numbers, .tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

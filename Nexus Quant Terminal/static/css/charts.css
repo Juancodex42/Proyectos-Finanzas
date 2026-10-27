@@ -1,0 +1,338 @@
+/* ==========================================================================
+   NEXUS QUANT TERMINAL - CHARTS, TELEMETRY & VISUAL OVERLAYS
+   Milestone 1 CSS Refactor: Canvas Wrappers, Tooltips, Progress, Overlays
+   ========================================================================== */
+
+/* 1. Chart Canvas Containers & Wrappers */
+.chart-container {
+    width: 100%;
+    height: 480px;
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: #080c14;
+}
+
+.chart-wrapper {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    min-height: 260px;
+}
+
+.equity-chart-container {
+    height: 580px;
+    min-height: 540px;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--space-4);
+    position: relative;
+}
+
+.empty-text {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-style: italic;
+    text-align: center;
+    padding: var(--space-4);
+}
+
+.loading-spinner {
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid var(--accent-primary);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    animation: spin 0.8s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    z-index: 10;
+}
+
+.loading-spinner.active {
+    display: block;
+}
+
+@keyframes spin { 
+    0% { transform: translate(-50%, -50%) rotate(0deg); } 
+    100% { transform: translate(-50%, -50%) rotate(360deg); } 
+}
+
+.empty-chart-overlay,
+#smart-tv-chart-empty {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    z-index: 10;
+    border-radius: var(--radius-md);
+}
+
+/* 2. Accessible High-Contrast Tooltips */
+.tooltip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border-subtle);
+    border-radius: 50%;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    cursor: help;
+    margin-left: 6px;
+}
+
+.tooltip:hover {
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.tooltip-text {
+    visibility: hidden;
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-focus);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: normal;
+    width: 280px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity var(--duration-micro) ease;
+    pointer-events: none;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* 3. Telemetry Console & SSE Event Log Streams */
+.smart-console-wrapper {
+    background: #06090f;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
+}
+
+.console-header {
+    background: #0b1019;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.console-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.console-dot.red { background: #ef4444; }
+.console-dot.yellow { background: #f59e0b; }
+.console-dot.green { background: #10b981; }
+
+.console-title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+.console-body {
+    padding: 12px 14px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    max-height: 140px;
+    overflow-y: auto;
+    color: #38bdf8;
+}
+
+/* 4. Shimmer Progress Bars */
+.progress-container {
+    margin-top: 14px;
+    width: 100%;
+}
+
+.progress-bar-bg {
+    background: var(--bg-hover);
+    border-radius: var(--radius-pill);
+    height: 8px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border-subtle);
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, var(--accent-primary) 0%, #38bdf8 100%);
+    height: 100%;
+    width: 0%;
+    border-radius: var(--radius-pill);
+    transition: width var(--duration-state) ease;
+}
+
+.smart-progress-bar-container {
+    background: var(--bg-hover);
+    height: 4px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.smart-progress-bar-fill {
+    background: linear-gradient(90deg, var(--accent-green) 0%, var(--accent-secondary) 100%);
+    height: 100%;
+    width: 0%;
+    transition: width var(--duration-state) ease;
+}
+
+/* 5. Paroli Ladder & Convex Progression Engine */
+.streak-ladder {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ladder-step {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-hover);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    transition: all var(--duration-micro) ease;
+}
+
+.ladder-step:hover {
+    border-color: var(--border-focus);
+}
+
+.ladder-step.active {
+    border-color: var(--accent-amber);
+    background: rgba(245, 158, 11, 0.12);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+}
+
+.ladder-step.completed {
+    border-color: var(--accent-green);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.ladder-step-number {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.ladder-step-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ladder-step-title {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--text-primary);
+}
+
+.ladder-step-amount {
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--accent-amber);
+}
+
+.ladder-step-meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* 6. Top Strategy Ranking Pills & Recommendation Cards */
+.top-strategies-wrapper {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.top-strategy-pill,
+.top-strat-pill {
+    background: var(--bg-hover);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all var(--duration-micro) ease;
+}
+
+.top-strategy-pill:hover,
+.top-strat-pill:hover {
+    border-color: var(--accent-purple);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.2);
+}
+
+.smart-rec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.smart-rec-item {
+    background: var(--bg-hover);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px;
+}
+
+.smart-rec-item p {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--accent-primary);
+}
+
+.smart-rec-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.recommendation-banner {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid var(--accent-primary);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: var(--space-4);
+}
+
+.recommendation-stat p {
+    font-size: 1.4rem;
+    font-weight: 800;
+}

@@ -1,0 +1,89 @@
+<div class="results-panel">
+                        <div class="stats-cards" id="quick-stats">
+                            <div class="stat-card"><h3>Win Rate</h3><p id="stat-winrate">--</p></div>
+                            <div class="stat-card"><h3>Trades</h3><p id="stat-trades">--</p></div>
+                            <div class="stat-card"><h3>P&L Neto</h3><p id="stat-pnl">--</p></div>
+                            <div class="stat-card"><h3>Max Win Streak</h3><p id="stat-mw">--</p></div>
+                            <div class="stat-card"><h3>Max Loss Streak</h3><p id="stat-ml">--</p></div>
+                        </div>
+                        <div class="equity-chart-container chart-card glass-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                                <h3 style="font-size: 1.15rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                    Curva de Capital (Equity Curve)
+                                    <span class="tooltip">?
+                                        <span class="tooltip-text">Muestra cómo sube o baja tu dinero a lo largo del tiempo. Sirve para ver el rendimiento general y si la estrategia es ganadora a largo plazo.</span>
+                                    </span>
+                                </h3>
+                                <div class="scale-toggle-group">
+                                    <button type="button" class="scale-toggle-btn active" id="btn-scale-linear" data-scale="linear">Lineal</button>
+                                    <button type="button" class="scale-toggle-btn" id="btn-scale-log" data-scale="log">Logarítmica</button>
+                                </div>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="equity-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="trades-table-container glass-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                                <h3 style="font-size: 1.15rem; margin: 0; color: var(--accent-primary); display: flex; align-items: center; gap: 8px;">
+                                    📋 Registro de Operaciones Clásicas (Triple Barrera)
+                                </h3>
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="button" class="btn-secondary" id="btn-export-csv" style="padding: 6px 12px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                        📥 Exportar CSV
+                                    </button>
+                                    <button type="button" class="btn-secondary" id="btn-export-pdf" style="padding: 6px 12px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-color: var(--accent-green); color: var(--accent-green);">
+                                        📄 Reporte PDF
+                                    </button>
+                                </div>
+                            </div>
+                            <table class="trades-table" id="trades-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Fecha/Hora</th>
+                                        <th>Tipo</th>
+                                        <th style="text-align: right;">Entrada</th>
+                                        <th style="text-align: right;">Stop Loss</th>
+                                        <th style="text-align: right;">Take Profit</th>
+                                        <th style="text-align: right;">Salida</th>
+                                        <th style="text-align: center;">Duración</th>
+                                        <th style="text-align: right;">R:R</th>
+                                        <th style="text-align: right;">P&L ($)</th>
+                                        <th style="text-align: center;">Causa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 2.5: Resultados -->
+            <section id="resultados" class="tab-pane">
+                <div class="resultados-grid">
+                    <!-- Izquierda: Optimizaciones Automáticas -->
+                    <div class="resultados-panel glass-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 8px;">
+                            <h2 style="font-size: 1.35rem; color: var(--accent-primary);">⚡ Optimizaciones Automáticas (Historial)</h2>
+                            <button type="button" class="btn-secondary" id="btn-clear-history" style="width: auto; padding: 8px 16px; font-size: 0.88rem; border-color: var(--accent-red); color: var(--accent-red);">Limpiar Historial</button>
+                        </div>
+                        <div class="backtest-list" id="history-list">
+                            <p class="empty-text">No hay optimizaciones automáticas registradas.</p>
+                        </div>
+                    </div>
+
+                    <!-- Derecha: Backtests Manuales & Favoritos -->
+                    <div class="resultados-panel glass-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h2 style="font-size: 1.35rem; color: var(--accent-purple);">⚙️ Backtests Manuales & Favoritos</h2>
+                        </div>
+                        <div class="backtest-list" id="saved-list">
+                            <p class="empty-text">No hay simulaciones manuales o favoritas guardadas.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>

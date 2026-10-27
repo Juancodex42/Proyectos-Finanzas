@@ -1,0 +1,100 @@
+# ============================================================================
+# Gitignore Maestro — Portafolio de Ingeniería de Software Financiero & Cuantitativo
+# ============================================================================
+
+# 1. Asistente IA, Metadatos y Entorno Local
+.agents/
+.gemini/
+
+# 2. Cachés de Python, Pruebas y Compilación Rust
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.eggs/
+*.egg-info/
+.coverage
+htmlcov/
+target/
+
+# 3. Entornos Virtuales
+venv/
+.venv/
+env/
+.env_*/
+ENV/
+
+# 4. Credenciales, Secretos y Claves Privadas (¡CRÍTICO DE SEGURIDAD!)
+.env
+.env.*
+.env.local
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+*.key
+*.pem
+*.crt
+*.pfx
+*.p12
+*.cer
+*.csr
+
+# 5. Logs, Trazas y Volcados Temporales
+*.log
+logs/
+data/logs/*
+!data/logs/.gitkeep
+reports/*
+!reports/.gitkeep
+*.tmp
+*.bak
+*.swp
+*~
+desktop.ini
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# 6. Bases de Datos Locales y Estados de Ejecución
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+*.db-journal
+*.sql
+*.dump
+bot_state.json
+data/state/*
+!data/state/.gitkeep
+
+# 7. Datasets Históricos y Archivos Pesados (Git Bloat Prevention)
+**/data/*.csv
+**/data/**/*.csv
+**/data/*.parquet
+**/data/*.h5
+**/data/*.feather
+**/data/*.pkl
+**/data/*.pickle
+**/data/raw/
+**/data/optuna_results.json
+*.xls
+*.xlsx
+*.zip
+*.pdf
+!**/docs/**
+!**/data/*.py
+
+# 8. Node / Frontend
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+build/
+.npm/
+frontend/.vite/
+frontend/public/logo-valle.png

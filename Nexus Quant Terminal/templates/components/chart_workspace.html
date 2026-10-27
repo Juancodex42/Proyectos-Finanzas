@@ -1,0 +1,44 @@
+<section id="dashboard" class="tab-pane">
+                <div class="controls-bar glass-card">
+                    <div class="control-group">
+                        <label for="pair-selector">Par
+                            <span class="tooltip">?
+                                <span class="tooltip-text">El par de criptomonedas o divisa sobre el cual se cargan las velas de precios (ej. BTCUSDT).</span>
+                            </span>
+                        </label>
+                        <select id="pair-selector">
+                            <option value="BTCUSDT">BTCUSDT</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="interval-selector">Intervalo
+                            <span class="tooltip">?
+                                <span class="tooltip-text">La duración de tiempo de cada vela japonesa (ej. 1h o 30m).</span>
+                            </span>
+                        </label>
+                        <select id="interval-selector">
+                            <option value="1d">1d</option>
+                            <option value="4h">4h</option>
+                            <option value="1h">1h</option>
+                            <option value="30m" selected>30m</option>
+                            <option value="15m">15m</option>
+                            <option value="5m">5m</option>
+                            <option value="1m">1m</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="source-selector">Fuente de Datos
+                            <span class="tooltip">?
+                                <span class="tooltip-text">Selecciona si deseas simular usando datos históricos locales estables (recomendado) o datos en vivo vía Binance API.</span>
+                            </span>
+                        </label>
+                        <select id="source-selector">
+                            <option value="historical">Histórico (Local)</option>
+                            <option value="live">En Vivo (Binance API)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container glass-card" id="tv-chart">
+                    <div class="loading-spinner" id="chart-loader"></div>
+                </div>
+            </section>

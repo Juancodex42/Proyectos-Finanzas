@@ -1,0 +1,51 @@
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# Python Bytecode & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Scratch & Temporary Debugging Artifacts
+scratch/
+tmp/
+*.tmp
+*.bak
+*.swp
+*.log
+
+# Agent Runs & Ephemeral Logs (preserve permanent architecture skills)
+.agents/*
+!.agents/skills/
+!.agents/skills/**
+
+# Rust Build Artifacts (preserve prebuilt release binary if tracked)
+target/
+**/target/debug/
+**/target/release/deps/
+**/target/release/.fingerprint/
+**/target/release/build/
+**/target/release/incremental/
+**/target/release/*.pdb
+**/target/release/*.d
+**/target/CACHEDIR.TAG
+
+# Local Market Data & Runtime State Caches
+data/*.csv
+data/raw/*.csv
+data/*.json
+bot_state.json
+
+# OS & IDE Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

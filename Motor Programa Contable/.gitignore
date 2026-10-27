@@ -1,0 +1,63 @@
+# ============================================================================
+# Gitignore - Motor Programa Contable / CryptoTax Pro
+# ============================================================================
+
+# 1. Secretos y Entornos (¡CRÍTICO DE SEGURIDAD!)
+.env
+*.env
+.env.*
+!.env.example
+
+# 2. Bases de Datos Locales y Archivos Temporales de DB
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+*.db.bak
+*.sqlite
+*.sqlite3
+test_temp*.db
+certifications.db
+
+# 3. Uploads y Datos Privados de Usuario
+webapp/backend/uploads/*
+!webapp/backend/uploads/.gitkeep
+!webapp/backend/uploads/certifications/.gitkeep
+auto_sync_state.json
+.auto_sync.lock
+
+# 4. Logs, Locks y Trazas de Runtime
+*.log
+backend*.log
+auto_sync.log
+system.lock
+
+# 5. Volcados de Texto y Reportes Temporales
+git_diff_*.txt
+test_stress_*.txt
+test_*.txt
+Reporte_*.xlsx
+*.xlsx
+docs/archive/git_diff_*.txt
+
+# 6. Cachés de Python, Testing y Tipado
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+*.py[cod]
+*$py.class
+
+# 7. Frontend, Dependencias y Builds
+node_modules/
+dist/
+build/
+.npm/
+
+# 8. Asistente IA, IDEs y Sistema Operativo
+.agents/
+.gemini/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

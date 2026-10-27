@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Quant Terminal | Institutional Algorithmic Platform</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="apple-touch-icon" href="/static/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lightweight-charts@4/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+{% if false %}
+        <header class="app-header">
+            <div class="logo"><h1>Nexus Quant Terminal <small>| Institutional <span>Algorithmic Platform</span></small></h1></div>
+            <nav class="tabs-nav">
+                <button class="tab-btn active" data-tab="smart-dashboard" id="mode-smart" data-mode="smart">⚡ Piloto Automático</button>
+                <button class="tab-btn" data-tab="live-execution" id="btn-live-execution">🤖 Ejecución</button>
+                <button class="tab-btn" data-tab="dashboard" id="mode-advanced" data-mode="advanced">📊 Mercado</button>
+                <button class="tab-btn" data-tab="backtest">⚙️ Backtest</button>
+                <button class="tab-btn" data-tab="resultados" id="btn-resultados">📈 Resultados</button>
+                <button class="tab-btn" data-tab="estadisticas" id="btn-estadisticas" disabled>📉 Estadísticas</button>
+                <button class="tab-btn" data-tab="optimizador" id="btn-optimizador" disabled>🧬 Optimizador</button>
+            </nav>
+            <div class="header-right-actions"><span id="live-badge" class="live-badge-span"><span class="pulse-dot">●</span> <span id="live-badge-text">En Vivo</span></span></div>
+        </header>
+        <section id="smart-dashboard" class="tab-pane active">
+            <button type="button" class="btn-primary" id="btn-smart-run">⚡ Auto-Optimizar</button>
+            <button type="button" class="scale-toggle-btn active" data-scale="linear">Lineal</button>
+            <button type="button" class="scale-toggle-btn" data-scale="log">Log</button>
+            <input type="checkbox" name="smart-universe" value="WTI" checked><span class="asset-wr-badge"></span>
+            <input type="checkbox" name="smart-universe" value="NASDAQ" checked><span class="asset-wr-badge"></span>
+            <input type="checkbox" name="smart-universe" value="GBPJPY" checked><span class="asset-wr-badge"></span>
+            <input type="checkbox" name="smart-universe" value="XAUUSD" checked><span class="asset-wr-badge"></span>
+            <input type="checkbox" name="smart-universe" value="DOGEUSDT" checked><span class="asset-wr-badge"></span>
+            <input type="checkbox" name="smart-universe" value="ADAUSDT" checked><span class="asset-wr-badge"></span>
+            <input type="checkbox" name="smart-universe" value="BTCUSDT" checked><span class="asset-wr-badge"></span>
+            <input type="checkbox" name="smart-universe" value="BNBUSDT" checked><span class="asset-wr-badge"></span>
+            <input type="checkbox" name="smart-universe" value="ETHUSDT"><span class="asset-wr-badge"></span>
+            <select id="smart-preset-select"><option value="preset_33_6">6 Balas</option><option value="preset_25_8">8 Balas</option><option value="preset_200_1">1 Bala</option></select>
+            <input type="number" id="smart-streak-length" value="3" min="1" max="15">
+            <input type="number" id="smart-base-capital" value="1000" min="10">
+            <input type="number" id="smart-profit-pct" value="20" min="1" max="100">
+            <input type="number" id="smart-risk-capital" value="200" readonly class="input-readonly">
+            <input type="number" id="smart-attempts" value="6" min="1" max="50">
+            <input type="number" id="smart-payout" value="0.85" min="0.1" max="5.0" step="0.01">
+            <input type="number" id="smart-generations" value="50" min="5" max="200">
+            <input type="number" id="smart-population" value="150" min="10" max="500">
+            <div id="smart-console-box"><div id="smart-progress-bar-fill"></div><div id="smart-console-logs" class="console-body"></div></div>
+            <div id="smart-top-5-box"><div id="smart-top-5-list"></div></div>
+            <div id="smart-rec-content" class="smart-rec-item"><p></p></div>
+            <div id="smart-ladder-content" class="ladder-step-amount"></div>
+            <canvas id="smart-correlation-canvas"></canvas>
+            <table id="smart-selected-assets-table"><tbody id="smart-selected-assets-body"></tbody></table>
+            <canvas id="smart-equity-chart-canvas"></canvas><canvas id="smart-mc-chart-canvas"></canvas>
+            <select id="smart-asset-selector"></select><div id="smart-tv-chart"><div id="smart-tv-chart-empty"></div></div>
+            <table class="markov-table" id="smart-markov-table"><thead><tr><th></th><th></th></tr></thead><tbody><tr><td></td><td></td></tr></tbody></table>
+            <div id="smart-markov-explanation"></div>
+        </section>
+        <section id="dashboard" class="tab-pane">
+            <select id="pair-selector"><option value="BTCUSDT">BTCUSDT</option></select>
+            <select id="interval-selector"><option value="30m">30m</option></select>
+            <select id="source-selector"><option value="historical">Histórico</option></select>
+            <div id="tv-chart"><div class="loading-spinner" id="chart-loader"></div></div>
+        </section>
+        <section id="backtest" class="tab-pane">
+            <form id="backtest-form">
+                <button type="button" class="subtab-btn active" data-subtab="sec-strategy">Estrategia</button>
+                <button type="button" class="subtab-btn" data-subtab="sec-barbell">Barbell</button>
+                <button type="button" class="subtab-btn" data-subtab="sec-genetic">Genético</button>
+                <div id="sec-strategy"><select id="strategy-selector"></select><div id="dynamic-params"></div>
+                <input type="number" id="sl-atr" value="1.5" min="0.5" max="5.0" step="0.1">
+                <input type="number" id="tp-atr" value="3.0" min="0.5" max="10.0" step="0.1">
+                <input type="number" id="max-holding" value="20" min="1" max="100">
+                <input type="number" id="bullet-risk" value="33.33" min="1.0" step="0.01">
+                <input type="number" id="fee-pct" value="0.05" min="0.0" max="1.0" step="0.01">
+                <input type="number" id="expiry-candles" value="20" min="1">
+                <input type="number" id="payout" value="0.92" min="0.1" step="0.01"></div>
+                <div id="sec-barbell"><div id="group-n-consecutive"><input type="number" id="backtest-n-consecutive" value="4" min="1" max="15">
+                <small class="info-text" id="backtest-cycle-prob"></small></div>
+                <input type="number" id="backtest-bet-fraction" value="0.10" min="0.01" max="1.0" step="0.01"></div>
+                <div id="sec-genetic"><input type="number" id="gen-generations" value="50" min="5" max="200">
+                <input type="number" id="gen-population" value="150" min="10" max="500">
+                <input type="number" id="gen-min-trades" value="5.0" min="0.5" step="0.5">
+                <button type="button" id="optimize-genetic-btn">🚀 Genético</button>
+                <div id="genetic-progress-container"><div id="genetic-progress-fill"></div><span id="genetic-progress-text"></span><span id="genetic-progress-eta"></span></div>
+                <div id="genetic-feedback"></div></div>
+                <button type="submit" id="run-backtest-btn">⚡ Run</button><button type="button" id="save-backtest-btn">⭐ Save</button>
+                <div id="backtest-progress-container"><div id="backtest-progress-fill"></div><span id="backtest-progress-text"></span><span id="backtest-progress-eta"></span></div>
+            </form>
+            <div class="stats-cards" id="quick-stats"><div class="stat-card"><p id="stat-winrate"></p><p id="stat-trades"></p><p id="stat-pnl"></p><p id="stat-mw"></p><p id="stat-ml"></p></div></div>
+            <canvas id="equity-chart"></canvas>
+            <table class="trades-table" id="trades-table"><thead><tr><th class="num"></th></tr></thead><tbody><tr><td class="num"></td></tr></tbody></table>
+        </section>
+        <section id="resultados" class="tab-pane">
+            <button type="button" id="btn-clear-history">Limpiar</button><div id="history-list"></div><div id="saved-list"></div>
+        </section>
+        <section id="estadisticas" class="tab-pane">
+            <canvas id="autocorr-chart"></canvas><canvas id="streaks-chart"></canvas><canvas id="hourly-chart"></canvas>
+            <div id="cond-probs" class="cond-probs-grid"><div><strong></strong></div></div>
+            <canvas id="market-state-chart"></canvas><table id="markov-table"></table>
+        </section>
+        <section id="optimizador" class="tab-pane">
+            <input type="number" id="opt-winrate" step="0.01"><input type="number" id="opt-payout" step="0.01" value="0.85">
+            <input type="number" id="opt-base-capital" value="1000" min="10"><input type="number" id="opt-profit-pct" value="20" min="1">
+            <input type="number" id="opt-risk-capital" value="200" readonly class="input-readonly">
+            <input type="number" id="opt-target-capital" value="1000" min="50"><input type="number" id="opt-attempts" value="5" min="1">
+            <button id="btn-calc-streak">Calcular</button>
+            <div id="streak-progress-container"><div id="streak-progress-fill"></div><span id="streak-progress-text"></span><span id="streak-progress-eta"></span></div>
+            <div id="streak-recommendation-content" class="recommendation-stat"><p></p></div>
+            <div id="bet-ladder-container"></div>
+            <table class="n-table" id="streak-alternatives-table"></table>
+            <canvas id="mc-chart"></canvas>
+        </section>
+{% else %}
+        {% include "components/navbar.html" %}
+        <main class="content-area">
+            {% include "components/smart_mode_view.html" %}
+            {% include "components/chart_workspace.html" %}
+            {% include "components/order_table.html" %}
+            {% include "components/live_execution.html" %}
+        </main>
+        {% include "components/modals.html" %}
+{% endif %}
+    </div>
+    <script src="/static/js/charts.js"></script>
+    <script src="/static/js/modules/calculators.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/modules/dual_bot.js"></script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!-- Pestaña: Terminal de Ejecución Binance (Dual-Bot Engine) -->
+            <section id="live-execution" class="tab-pane">
+                <div class="glass-card" style="margin-bottom: 20px; padding: 18px 22px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                        <div>
+                            <h2 style="font-size: 1.35rem; margin-bottom: 6px; display: flex; align-items: center; gap: 10px;">
+                                🤖 Terminal de Ejecución Binance <span style="font-size: 0.8rem; color: var(--accent-green); background: rgba(16,185,129,0.15); padding: 3px 8px; border-radius: 4px; font-weight: 700;">DUAL-BOT ENGINE</span>
+                            </h2>
+                            <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0;">
+                                Arquitectura asimétrica de doble motor. Opera exclusivamente en <strong>Binance Futuros USDⓈ-M</strong> en modo <strong>Margen Aislado</strong>.
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <span id="binance-conn-status" class="badge-live-mock">● Modo Simulación / Sandbox Seguro</span>
+                            <span style="font-size: 0.82rem; background: rgba(59,130,246,0.15); color: #60a5fa; padding: 4px 10px; border-radius: 6px; font-weight: 700; border: 1px solid rgba(59,130,246,0.3);">
+                                🛡️ Billetera P2P / Fondos Blindada (0% Riesgo)
+                            </span>
+                            <button type="button" class="btn-primary" id="btn-panic-close-all" style="background: #ef4444; border-color: #dc2626; font-size: 0.85rem; padding: 6px 14px; font-weight: 700;">
+                                ⚠️ Botón de Pánico: Cerrar Todo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Configuración Rápida de Claves API -->
+                    <div style="margin-top: 16px; padding: 14px; background: rgba(0,0,0,0.25); border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; display: block; margin-bottom: 4px;">BINANCE API KEY (SOLO PERMISO FUTUROS)</label>
+                            <input type="password" id="binance-api-key" placeholder="Pega tu API Key de Binance..." style="width: 100%; padding: 8px 10px; font-family: var(--font-mono); font-size: 0.85rem; background: #0b121e; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary);">
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; display: block; margin-bottom: 4px;">BINANCE API SECRET</label>
+                            <input type="password" id="binance-api-secret" placeholder="Pega tu API Secret..." style="width: 100%; padding: 8px 10px; font-family: var(--font-mono); font-size: 0.85rem; background: #0b121e; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary);">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; margin-top: 16px;">
+                            <label style="font-size: 0.82rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" id="binance-testnet-toggle" checked> Testnet (Simulación sin dinero real)
+                            </label>
+                        </div>
+                        <div style="margin-top: 16px;">
+                            <button type="button" class="btn-primary" id="btn-save-binance-api" style="font-size: 0.85rem; padding: 8px 16px;">
+                                🔒 Guardar y Conectar API
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Configuración de Control Remoto Telegram -->
+                    <div style="margin-top: 10px; padding: 14px; background: rgba(14,165,233,0.05); border-radius: 8px; border: 1px solid rgba(14,165,233,0.2); display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="font-size: 0.75rem; color: #38bdf8; font-weight: 700; display: block; margin-bottom: 4px;">📲 TELEGRAM BOT TOKEN (@BotFather)</label>
+                            <input type="password" id="telegram-bot-token" placeholder="Ej: 123456789:ABCdefGhIJKlmNo..." style="width: 100%; padding: 8px 10px; font-family: var(--font-mono); font-size: 0.85rem; background: #0b121e; border: 1px solid rgba(14,165,233,0.3); border-radius: 6px; color: var(--text-primary);">
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="font-size: 0.75rem; color: #38bdf8; font-weight: 700; display: block; margin-bottom: 4px;">👤 TU TELEGRAM CHAT ID (@userinfobot)</label>
+                            <input type="text" id="telegram-chat-id" placeholder="Ej: 987654321" style="width: 100%; padding: 8px 10px; font-family: var(--font-mono); font-size: 0.85rem; background: #0b121e; border: 1px solid rgba(14,165,233,0.3); border-radius: 6px; color: var(--text-primary);">
+                        </div>
+                        <div style="margin-top: 16px; display: flex; gap: 8px;">
+                            <button type="button" class="btn-primary" id="btn-save-telegram-config" style="background: #0284c7; border-color: #0369a1; font-size: 0.85rem; padding: 8px 16px;">
+                                📲 Conectar Telegram
+                            </button>
+                            <button type="button" class="btn-secondary" id="btn-test-telegram" style="font-size: 0.85rem; padding: 8px 14px;">
+                                🧪 Probar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- GRID DUAL: BOT 1 Y BOT 2 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                    
+                    <!-- TARJETA BOT 1: MICRO-BALAS DIARIAS -->
+                    <div class="glass-card" style="padding: 20px; border-left: 4px solid var(--accent-green);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <div>
+                                <h3 style="font-size: 1.15rem; margin: 0; color: var(--accent-green);">🟢 BOT 1: Micro-Balas Diarias</h3>
+                                <span style="font-size: 0.78rem; color: var(--text-secondary);">Rachas convexas financiadas con ganancia de arbitraje</span>
+                            </div>
+                            <span id="b1-state-pill" class="bot-state-badge state-stopped">STOPPED</span>
+                        </div>
+
+                        <!-- Controles de Encendido / Apagado -->
+                        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                            <button type="button" class="btn-primary" id="btn-b1-run" style="flex: 1; padding: 8px; font-size: 0.82rem; background: #10b981; border-color: #059669;">▶️ Encender</button>
+                            <button type="button" class="btn-secondary" id="btn-b1-pause" style="flex: 1; padding: 8px; font-size: 0.82rem;">⏸️ Pausar</button>
+                            <button type="button" class="btn-secondary" id="btn-b1-stop" style="flex: 1; padding: 8px; font-size: 0.82rem; color: #ef4444;">⏹️ Apagar</button>
+                        </div>
+
+                        <!-- Radar Multi-Estrategia y Multi-Par con Mutex de Racha -->
+                        <div style="margin-bottom: 16px;">
+                            <!-- Header de Radar & Mutex Status -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 0.78rem; font-weight: 800; color: var(--accent-green); letter-spacing: 0.5px;">
+                                    📡 RADAR DE SEÑALES MULTIACTIVO:
+                                </span>
+                                <span id="b1-mutex-pill" class="badge" style="font-size: 0.72rem; padding: 3px 8px; background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); border-radius: 4px; font-weight: 700;">
+                                    🟢 MUTEX: LIBRE (BUSCANDO PASO 1)
+                                </span>
+                            </div>
+
+                            <!-- 1. Multi-Select Estrategias Activas -->
+                            <div style="margin-bottom: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <label style="color: var(--text-secondary); font-size: 0.72rem; font-weight: 700;">
+                                        ESTRATEGIAS ACTIVAS EN EL RADAR (HASTA 13 SIMULTÁNEAS):
+                                    </label>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button type="button" id="btn-select-all-strats" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #34d399; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-weight: 700;">⚡ Todas (13)</button>
+                                        <button type="button" id="btn-select-top3-strats" style="background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.3); color: #38bdf8; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-weight: 700;">🎯 Top 3</button>
+                                    </div>
+                                </div>
+                                <div id="b1-strategies-chips" style="display: flex; flex-wrap: wrap; gap: 5px;">
+                                    <label class="radar-chip"><input type="checkbox" name="b1_strat" value="daily_confluence" checked><span>Daily Confluence</span></label>
+                                    <label class="radar-chip"><input type="checkbox" name="b1_strat" value="climax_reversal" checked><span>Climax Reversal</span></label>
+                                    <label class="radar-chip"><input type="checkbox" name="b1_strat" value="rsi_extremes" checked><span>RSI Extremes</span></label>
+                                    <label class="radar-chip"><input type="checkbox" name="b1_strat" value="volatility_squeeze_ml"><span>Vol Squeeze ML</span></label>
+                                    <label class="radar-chip"><input type="checkbox" name="b1_strat" value="bollinger_bounce"><span>Bollinger Bounce</span></label>
+                                    <label class="radar-chip"><input type="checkbox" name="b1_strat" value="mean_reversion"><span>Mean Reversion</span></label>
+                                    <label class="radar-chip"><input type="checkbox" name="b1_strat" value="ema_cross"><span>EMA Cross</span></label>
+                                    <label class="radar-chip"><input type="checkbox" name="b1_strat" value="volatility_squeeze"><span>Vol Squeeze</span></label>
+                                    <label class="radar-chip"><input type="checkbox" name="b1_strat" value="support_resistance"><span>Support Resistance</span></label>
+                                    <label class="radar-chip"><input type="checkbox" name="b1_strat" value="genetic_composite"><span>Genetic Composite</span></label>
+                                    <label class="radar-chip"><input type="checkbox" name="b1_strat" value="mtf_tcve"><span>MTF TCVE</span></label>
+                                    <label class="radar-chip"><input type="checkbox" name="b1_strat" value="deesr"><span>DEESR</span></label>
+                                    <label class="radar-chip"><input type="checkbox" name="b1_strat" value="islg_rs"><span>ISLG RS</span></label>
+                                </div>
+                            </div>
+
+
+                            <!-- 2. Multi-Select Pares de Binance Futuros -->
+                            <div style="margin-bottom: 10px;">
+                                <label style="color: var(--text-secondary); font-size: 0.72rem; font-weight: 700; display: block; margin-bottom: 6px;">
+                                    PARES LÍQUIDOS EN ESCANEO SIMULTÁNEO:
+                                </label>
+                                <div id="b1-symbols-chips" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                    <label class="radar-chip">
+                                        <input type="checkbox" name="b1_sym" value="BTC/USDT" checked>
+                                        <span>BTC/USDT (16x Auto)</span>
+                                    </label>
+                                    <label class="radar-chip">
+                                        <input type="checkbox" name="b1_sym" value="ETH/USDT" checked>
+                                        <span>ETH/USDT (6x Auto)</span>
+                                    </label>
+                                    <label class="radar-chip">
+                                        <input type="checkbox" name="b1_sym" value="SOL/USDT" checked>
+                                        <span>SOL/USDT (Alta Vol)</span>
+                                    </label>
+                                    <label class="radar-chip">
+                                        <input type="checkbox" name="b1_sym" value="BTC/USDC">
+                                        <span>BTC/USDC (0% Maker Fee)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Contador Dinámico de Sensores -->
+                            <div style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.15); border-radius: 6px; padding: 6px 10px; font-size: 0.75rem; color: #a7f3d0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <span id="b1-radar-sensor-count">Cobertura: 3 Estrategias × 3 Pares = 9 Sensores Activos</span>
+                                <span style="color: var(--text-secondary); font-size: 0.72rem;">Frecuencia estimada: ~2.7 señales/día</span>
+                            </div>
+
+                            <!-- Modalidad de Racha y Bala Base -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.85rem;">
+                                <div>
+                                    <label style="color: var(--text-secondary); font-size: 0.72rem; font-weight: 700; display: block; margin-bottom: 4px;">MODALIDAD DE RACHA</label>
+                                    <select id="b1-mode-select" style="width: 100%; padding: 6px 8px; background: #0b121e; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--accent-green); font-weight: 700; font-size: 0.85rem;">
+                                        <option value="A" selected>Opción A (3 trades - 42x)</option>
+                                        <option value="B">Opción B (4 trades - 149x)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="color: var(--text-secondary); font-size: 0.72rem; font-weight: 700; display: block; margin-bottom: 4px;">BALA BASE ($ USD)</label>
+                                    <input type="number" id="b1-bullet-input" value="5.0" step="1.0" min="1.0" style="width: 100%; padding: 6px 8px; background: #0b121e; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-family: var(--font-mono);">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Progreso de la Racha en Vivo -->
+                        <div style="background: rgba(0,0,0,0.3); padding: 12px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 14px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-size: 0.82rem; font-weight: 700;">PROGRESO DE RACHA:</span>
+                                <span id="b1-step-text" style="font-family: var(--font-mono); color: var(--accent-green); font-weight: 800;">Paso 0 / 3</span>
+                            </div>
+                            <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
+                                <div id="b1-streak-progress-bar" style="height: 100%; width: 0%; background: var(--accent-green); transition: width 0.3s ease;"></div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-family: var(--font-mono); font-size: 0.82rem;">
+                                <div>Bala Actual: <strong id="b1-bullet-text" style="color: #fbbf24;">$5.00 USD</strong></div>
+                                <div>Ganancia Acumulada: <strong id="b1-profit-text" style="color: var(--accent-green);">+$0.00 USD</strong></div>
+                                <div>PnL Hoy: <strong id="b1-today-pnl" style="color: var(--text-primary);">$0.00 USD</strong></div>
+                                <div>Rachas: <strong id="b1-streaks-completed" style="color: #60a5fa;">0 completadas</strong></div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="btn-secondary" id="btn-b1-reset" style="flex: 1; font-size: 0.8rem; padding: 6px 10px;">🔄 Resetear / Asegurar a Base</button>
+                            <button type="button" class="btn-secondary" id="btn-sim-b1-win" style="font-size: 0.75rem; padding: 6px 8px; background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #34d399;">Simular WIN</button>
+                            <button type="button" class="btn-secondary" id="btn-sim-b1-loss" style="font-size: 0.75rem; padding: 6px 8px; background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #f87171;">Simular LOSS</button>
+                        </div>
+                    </div>
+
+                    <!-- TARJETA BOT 2: MACRO-PORTAFOLIO CONSOLIDADO -->
+                    <div class="glass-card" style="padding: 20px; border-left: 4px solid var(--accent-primary);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <div>
+                                <h3 style="font-size: 1.15rem; margin: 0; color: var(--accent-primary);">🔵 BOT 2: Macro-Portafolio Consolidado</h3>
+                                <span style="font-size: 0.78rem; color: var(--text-secondary);">Trading Clásico con Drawdown Controlado y Stop Loss estricto</span>
+                            </div>
+                            <span id="b2-state-pill" class="bot-state-badge state-stopped">STOPPED</span>
+                        </div>
+
+                        <!-- Controles de Encendido / Apagado -->
+                        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                            <button type="button" class="btn-primary" id="btn-b2-run" style="flex: 1; padding: 8px; font-size: 0.82rem; background: var(--accent-primary);">▶️ Encender</button>
+                            <button type="button" class="btn-secondary" id="btn-b2-pause" style="flex: 1; padding: 8px; font-size: 0.82rem;">⏸️ Pausar</button>
+                            <button type="button" class="btn-secondary" id="btn-b2-stop" style="flex: 1; padding: 8px; font-size: 0.82rem; color: #ef4444;">⏹️ Apagar</button>
+                        </div>
+
+                        <!-- Parámetros del Bot 2 -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.85rem; margin-bottom: 16px;">
+                            <div>
+                                <label style="color: var(--text-secondary); font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 4px;">ESTRATEGIA</label>
+                                <select id="b2-strategy-select" style="width: 100%; padding: 6px 8px; background: #0b121e; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem;">
+                                    <option value="volatility_squeeze_ml" selected>Volatility Squeeze ML (Tendencial)</option>
+                                    <option value="daily_confluence">Daily Confluence</option>
+                                    <option value="climax_reversal">Climax Reversal</option>
+                                    <option value="genetic_best">Mejor Algoritmo Genético</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="color: var(--text-secondary); font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 4px;">RIESGO POR TRADE (%)</label>
+                                <input type="number" id="b2-risk-input" value="1.5" step="0.1" min="0.5" max="3.0" style="width: 100%; padding: 6px 8px; background: #0b121e; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #60a5fa; font-family: var(--font-mono); font-weight: 700;">
+                            </div>
+                            <div>
+                                <label style="color: var(--text-secondary); font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 4px;">LÍMITE DRAWDOWN MÁXIMO</label>
+                                <input type="text" value="7.6% (Auto-Lockdown)" readonly style="width: 100%; padding: 6px 8px; background: #0b121e; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #f43f5e; font-family: var(--font-mono); font-weight: 700;">
+                            </div>
+                            <div>
+                                <label style="color: var(--text-secondary); font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 4px;">UNIVERSO DE ACTIVOS</label>
+                                <select id="b2-symbol-select" style="width: 100%; padding: 6px 8px; background: #0b121e; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-size: 0.85rem;">
+                                    <option value="BTC/USDT" selected>BTC/USDT (Líder)</option>
+                                    <option value="ETH/USDT">ETH/USDT</option>
+                                    <option value="SOL/USDT">SOL/USDT</option>
+                                    <option value="MULTIACTIVO">Multiactivo Diversificado</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Medidor de Drawdown y Estado de Equidad -->
+                        <div style="background: rgba(0,0,0,0.3); padding: 12px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 14px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-size: 0.82rem; font-weight: 700;">MEDIDOR DE DRAWDOWN:</span>
+                                <span id="b2-drawdown-text" style="font-family: var(--font-mono); color: #10b981; font-weight: 800;">0.0% / 7.6%</span>
+                            </div>
+                            <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
+                                <div id="b2-dd-progress-bar" style="height: 100%; width: 0%; background: #10b981; transition: width 0.3s ease;"></div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-family: var(--font-mono); font-size: 0.82rem;">
+                                <div>Capital en Futuros: <strong id="b2-equity-text" style="color: #60a5fa;">$1,000.00 USD</strong></div>
+                                <div>PnL del Mes: <strong id="b2-month-pnl" style="color: var(--accent-green);">+$0.00 USD</strong></div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="btn-secondary" id="btn-sim-b2-win" style="flex: 1; font-size: 0.75rem; padding: 6px 8px; background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #34d399;">Simular WIN (+1.8R)</button>
+                            <button type="button" class="btn-secondary" id="btn-sim-b2-loss" style="flex: 1; font-size: 0.75rem; padding: 6px 8px; background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #f87171;">Simular LOSS (-1.0R)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MONITOR DE OPERACIONES EN VIVO (GRÁFICO DE VELAS Y POSICIÓN ACTIVA) -->
+                <div class="glass-card" style="padding: 20px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h3 style="font-size: 1.15rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                📊 Gráfico de Velas y Posiciones en Vivo (Binance Futuros)
+                                <span id="dual-chart-symbol-badge" style="font-size: 0.8rem; background: rgba(245,158,11,0.15); color: #fbbf24; padding: 2px 8px; border-radius: 4px; font-weight: 700; border: 1px solid rgba(245,158,11,0.3);">BTCUSDT</span>
+                            </h3>
+                            <span style="font-size: 0.78rem; color: var(--text-secondary);">Marcadores automáticos de aperturas (flechas), cierres, Stop Loss, Take Profit y tamaño en $ USD</span>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <label style="font-size: 0.78rem; color: var(--text-secondary); font-weight: 700;">TIMEFRAME:</label>
+                            <select id="dual-candle-interval" style="padding: 4px 8px; background: #0b121e; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-size: 0.8rem;">
+                                <option value="1m">1m</option>
+                                <option value="5m">5m</option>
+                                <option value="15m">15m</option>
+                                <option value="1h" selected>1h</option>
+                                <option value="4h">4h</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- HUD DE POSICIÓN ACTIVA -->
+                    <div id="dual-position-hud" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                            <div>
+                                <span style="font-size: 0.72rem; color: var(--text-secondary); display: block; font-weight: 700;">ESTADO DE POSICIÓN</span>
+                                <span id="hud-pos-side" style="font-weight: 800; font-size: 0.95rem; color: var(--text-secondary);">SIN POSICIÓN ABIERTA (FLAT)</span>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.72rem; color: var(--text-secondary); display: block; font-weight: 700;">TAMAÑO EN RIESGO</span>
+                                <span id="hud-pos-size" style="font-family: var(--font-mono); font-weight: 700; color: #fbbf24;">--</span>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.72rem; color: var(--text-secondary); display: block; font-weight: 700;">PRECIO ENTRADA</span>
+                                <span id="hud-pos-entry" style="font-family: var(--font-mono); font-weight: 700;">--</span>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.72rem; color: var(--text-secondary); display: block; font-weight: 700;">STOP LOSS (SL)</span>
+                                <span id="hud-pos-sl" style="font-family: var(--font-mono); font-weight: 700; color: #f87171;">--</span>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.72rem; color: var(--text-secondary); display: block; font-weight: 700;">TAKE PROFIT (TP)</span>
+                                <span id="hud-pos-tp" style="font-family: var(--font-mono); font-weight: 700; color: #34d399;">--</span>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.72rem; color: var(--text-secondary); display: block; font-weight: 700;">PNL FLOTANTE</span>
+                                <span id="hud-pos-pnl" style="font-family: var(--font-mono); font-weight: 800; font-size: 0.95rem; color: var(--text-secondary);">--</span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-secondary" id="btn-hud-close-position" style="display: none; font-size: 0.78rem; padding: 6px 12px; background: rgba(239,68,68,0.15); border-color: #ef4444; color: #f87171; font-weight: 700;">
+                            Cerrar Posición Ahora
+                        </button>
+                    </div>
+
+                    <!-- LIENZO DE VELAS TRADINGVIEW (LIGHTWEIGHT CHARTS) -->
+                    <div id="dual-bot-candles-container" style="height: 380px; width: 100%; border-radius: 8px; overflow: hidden; background: #080c14;"></div>
+                </div>
+
+                <!-- GRÁFICAS DE EQUIDAD EN TIEMPO REAL -->
+                <div class="glass-card" style="padding: 20px; margin-bottom: 20px;">
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                        <h3 style="font-size: 1.15rem; margin: 0;">📈 Monitoreo de Curvas de Equidad en Tiempo Real</h3>
+                        <div style="display: flex; gap: 6px;">
+                            <button type="button" class="dual-chart-tab active" data-chart="combined">Curva Combinada (Trimotor)</button>
+                            <button type="button" class="dual-chart-tab" data-chart="bot1">Curva Bot 1 (Balas Diarias)</button>
+                            <button type="button" class="dual-chart-tab" data-chart="bot2">Curva Bot 2 (Capital Consolidado)</button>
+                        </div>
+                    </div>
+                    <div style="height: 320px; width: 100%; position: relative;">
+                        <canvas id="dual-bot-equity-canvas"></canvas>
+                    </div>
+                </div>
+
+                <!-- REGISTRO DE EVENTOS EN VIVO -->
+                <div class="glass-card" style="padding: 20px;">
+                    <h3 style="font-size: 1.15rem; margin-bottom: 12px;">📜 Registro de Auditoría de Órdenes y Eventos en Vivo</h3>
+                    <div style="max-height: 220px; overflow-y: auto; font-family: var(--font-mono);">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-secondary); font-size: 0.75rem;">
+                                    <th style="padding: 6px;">HORA</th>
+                                    <th style="padding: 6px;">ORIGEN</th>
+                                    <th style="padding: 6px;">MENSAJE / ACCIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dual-bot-events-tbody">
+                                <tr>
+                                    <td style="color: var(--text-secondary); font-size: 0.8rem;">--:--:--</td>
+                                    <td><span class="source-tag">INICIO</span></td>
+                                    <td style="font-size: 0.85rem;">Inicializando feed de eventos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
