@@ -109,50 +109,7 @@ Para mantener la raíz del proyecto **limpia y ordenada**, se establece la sigui
 
 El sistema está diseñado bajo una arquitectura cliente-servidor modular (Frontend-Backend). Esta sección se genera **dinámicamente** escaneando los paquetes modulares reales de `webapp/backend/` (`db/`, `models/`, `parsers/`, `routes/`, `services/`, `api_clients/`, `compat/`, `utils/`, `workers/`) y analizando las dependencias de importación del código fuente.
 
-### 📊 Diagrama de Arquitectura y Flujo de Control (Simplificado)
-
-El siguiente diagrama resume el flujo integral del motor contable, desde la ingesta multicanal de extractos bancarios y APIs hasta la conciliación forense, cálculo impositivo y generación de certificaciones contables para el CPCE:
-
-```mermaid
-flowchart TD
-    subgraph Ingesta ["📥 1. Ingesta Multi-Fuente"]
-        Bancos["🏦 Extractos Bancarios\n(Galicia, BBVA, Macro, Santander, MP)\nFormatos: PDF, Excel, CSV"]
-        Exchanges["🪙 Exchanges Cripto\n(Binance, Lemon, Ripio, Fiwind, Bitso)\nFormatos: CSV, XLSX & APIs REST"]
-    end
-
-    subgraph Procesamiento ["⚙️ 2. Normalización, OCR & Deduplicación"]
-        OCR["Detector & OCR Engine\n(PyPDF2, OCR deskew, Normalizador de Fechas)"]
-        Dedup["Hash Canónico MD5\n(Deduplicación estricta & Mitigación de lotes duplicados)"]
-    end
-
-    subgraph Core ["🧠 3. Motor Contable Forense & Conciliación"]
-        FIFO["Motor FIFO de Costos\n(Cálculo de Base Imponible Ganancias / IIBB)"]
-        Reconcile["Conciliación Bancaria Forense\n(Matching inter-cuentas & Detección de Brechas)"]
-        DB[("transactions.db\nSQLite WAL Mode")]
-    end
-
-    subgraph Salidas ["📊 4. Reportes, Auditoría & Frontend"]
-        CPCE["📄 Papeles de Trabajo CPCE\n(Certificaciones Contables Oficiales en PDF / Excel)"]
-        WebUI["💻 Dashboard Web Interactivo\n(React 18 + Vite + Tailwind CSS)"]
-    end
-
-    Bancos --> OCR
-    Exchanges --> OCR
-    OCR --> Dedup
-    Dedup --> FIFO & Reconcile
-    FIFO <--> DB
-    Reconcile <--> DB
-    FIFO --> CPCE & WebUI
-    Reconcile --> CPCE & WebUI
-```
-
----
-
-### 🔍 Diagrama de Dependencias y Flujo de Control (Detallado)
-
-<details>
-<summary><b>Click para expandir el mapa completo de dependencias internas de código (AST)...</b></summary>
-
+### 📊 Diagrama de Dependencias y Flujo de Control
 
 ```mermaid
 graph TD
@@ -162,8 +119,6 @@ graph TD
 
     subgraph "Backend Modular (Flask)"
         app["app.py<br/>(API Principal)"]
-        conftest["conftest.py"]
-        exceptions["exceptions.py"]
         db_connection["db/connection.py"]
         models_cpa_seed_data["models/cpa_seed_data.py"]
         models_operational_models["models/operational_models.py"]
@@ -196,7 +151,6 @@ graph TD
         routes_certifications_bp["routes/certifications_bp.py"]
         routes_reconciliation_bp["routes/reconciliation_bp.py"]
         routes_reports_bp["routes/reports_bp.py"]
-        routes_reports_helpers["routes/reports_helpers.py"]
         routes_settings_bp["routes/settings_bp.py"]
         routes_transactions_bp["routes/transactions_bp.py"]
         services_analytics_service["services/analytics_service.py"]
@@ -217,6 +171,7 @@ graph TD
         services_orphan_transfer_service["services/orphan_transfer_service.py"]
         services_price_lookup_service["services/price_lookup_service.py"]
         services_reconciliation_service["services/reconciliation_service.py"]
+        services_reports_helpers["services/reports_helpers.py"]
         services_source_declarations_service["services/source_declarations_service.py"]
         services_source_freshness_service["services/source_freshness_service.py"]
         services_tax_anomaly_service["services/tax_anomaly_service.py"]
@@ -294,10 +249,8 @@ graph TD
     compat_pdf_table_extractor -.-> parsers_pdf_table_extractor
     compat_reconciliation -.-> services_reconciliation_service
     compat_status_cache -.-> utils_status_cache
-    conftest -.-> compat_db_manager
     db_connection -.-> models_transaction_models
     db_connection -.-> services_certifications_service
-    exceptions -.-> utils_exceptions
     models_transaction_models -.-> models_cpa_seed_data
     models_transaction_models -.-> services_price_lookup_service
     parsers_archive_processor -.-> compat_processor_lib
@@ -311,35 +264,34 @@ graph TD
     parsers_base_parser -.-> services_config_service
     parsers_base_parser -.-> services_tax_service
     parsers_base_parser -.-> utils_exceptions
-    parsers_binance_helpers -.-> compat_exceptions
     parsers_binance_helpers -.-> models_transaction_models
     parsers_binance_helpers -.-> parsers_base_parser
+    parsers_binance_helpers -.-> utils_exceptions
     parsers_binance_parser -.-> compat_db_manager
-    parsers_binance_parser -.-> compat_exceptions
     parsers_binance_parser -.-> models_transaction_models
     parsers_binance_parser -.-> parsers_archive_processor
     parsers_binance_parser -.-> parsers_base_parser
     parsers_binance_parser -.-> parsers_binance_helpers
-    parsers_bitget_parser -.-> compat_exceptions
+    parsers_binance_parser -.-> utils_exceptions
     parsers_bitget_parser -.-> models_transaction_models
     parsers_bitget_parser -.-> parsers_base_parser
+    parsers_bitget_parser -.-> utils_exceptions
     parsers_bitso_parser -.-> compat_config_manager
-    parsers_bitso_parser -.-> compat_exceptions
     parsers_bitso_parser -.-> models_transaction_models
     parsers_bitso_parser -.-> parsers_base_parser
     parsers_bitso_parser -.-> services_config_service
+    parsers_bitso_parser -.-> utils_exceptions
     parsers_dispatcher -.-> compat_db_manager
-    parsers_dispatcher -.-> compat_exceptions
     parsers_dispatcher -.-> utils_exceptions
     parsers_excel_multi_processor -.-> models_transaction_models
     parsers_excel_multi_processor -.-> parsers_base_parser
     parsers_exchange_detector -.-> db_connection
     parsers_exchange_detector -.-> parsers_base_parser
     parsers_fiwind_parser -.-> compat_config_manager
-    parsers_fiwind_parser -.-> compat_exceptions
     parsers_fiwind_parser -.-> models_transaction_models
     parsers_fiwind_parser -.-> parsers_base_parser
     parsers_fiwind_parser -.-> services_config_service
+    parsers_fiwind_parser -.-> utils_exceptions
     parsers_ocr_helper -.-> parsers_deskew_helper
     parsers_okx_parser -.-> parsers_base_parser
     parsers_okx_parser -.-> parsers_other_exchanges_parser
@@ -354,14 +306,14 @@ graph TD
     parsers_pdf_table_extractor -.-> models_transaction_models
     parsers_pdf_table_extractor -.-> parsers_ocr_helper
     parsers_pdf_table_extractor -.-> parsers_parallel_extractor
-    parsers_ripio_helpers -.-> compat_exceptions
     parsers_ripio_helpers -.-> models_transaction_models
     parsers_ripio_helpers -.-> parsers_base_parser
+    parsers_ripio_helpers -.-> utils_exceptions
     parsers_ripio_parser -.-> compat_config_manager
-    parsers_ripio_parser -.-> compat_exceptions
     parsers_ripio_parser -.-> models_transaction_models
     parsers_ripio_parser -.-> parsers_base_parser
     parsers_ripio_parser -.-> services_config_service
+    parsers_ripio_parser -.-> utils_exceptions
     routes_api_sync_bp -.-> compat_api_manager
     routes_api_sync_bp -.-> compat_async_helper
     routes_api_sync_bp -.-> compat_db_manager
@@ -390,24 +342,18 @@ graph TD
     routes_reports_bp -.-> services_cache_service
     routes_reports_bp -.-> services_cert_excel_cross_audit_service
     routes_reports_bp -.-> services_fifo_service
-    routes_reports_helpers -.-> compat_config_manager
-    routes_reports_helpers -.-> compat_db_manager
-    routes_reports_helpers -.-> compat_processor_lib
-    routes_reports_helpers -.-> models_transaction_models
-    routes_reports_helpers -.-> services_bank_persistence_service
-    routes_reports_helpers -.-> services_operational_excel_service
-    routes_reports_helpers -.-> utils_status_cache
+    routes_reports_bp -.-> services_reports_helpers
     routes_settings_bp -.-> compat_config_manager
     routes_settings_bp -.-> compat_db_manager
     routes_settings_bp -.-> services_auto_sync_daemon
     routes_settings_bp -.-> services_cache_service
     routes_settings_bp -.-> utils_status_cache
     routes_transactions_bp -.-> compat_db_manager
-    routes_transactions_bp -.-> compat_exceptions
     routes_transactions_bp -.-> compat_processor_lib
     routes_transactions_bp -.-> services_cache_service
     routes_transactions_bp -.-> services_fifo_service
     routes_transactions_bp -.-> services_transactions_service
+    routes_transactions_bp -.-> utils_exceptions
     services_analytics_service -.-> db_connection
     services_analytics_service -.-> services_cache_service
     services_analytics_service -.-> services_fifo_service
@@ -469,6 +415,13 @@ graph TD
     services_reconciliation_service -.-> parsers_base_parser
     services_reconciliation_service -.-> services_fifo_service
     services_reconciliation_service -.-> services_transactions_service
+    services_reports_helpers -.-> compat_config_manager
+    services_reports_helpers -.-> compat_db_manager
+    services_reports_helpers -.-> compat_processor_lib
+    services_reports_helpers -.-> models_transaction_models
+    services_reports_helpers -.-> services_bank_persistence_service
+    services_reports_helpers -.-> services_operational_excel_service
+    services_reports_helpers -.-> utils_status_cache
     services_source_declarations_service -.-> db_connection
     services_source_declarations_service -.-> models_transaction_models
     services_source_declarations_service -.-> services_cache_service
@@ -499,8 +452,6 @@ graph TD
 > [!NOTE]
 > Las líneas punteadas `-.->` indican dependencias directas de importación (`import`) detectadas estáticamente en el código backend.
 
-</details>
-
 ### 📁 Estructura Detectada del Proyecto
 
 #### Aplicación Web (`webapp/`)
@@ -509,8 +460,6 @@ graph TD
 
 #### Inventario Técnico Modular de Backend (`webapp/backend/`)
 - `app.py` - Servidor Flask principal y registro de blueprints.
-- `conftest.py`
-- `exceptions.py`
 - **`db/`** — Conexión SQLite, inicialización de esquema, migraciones y consultas base.
   - `db/connection.py`
 - **`models/`** — Modelos de dominio, normalización de exchanges y hash canónico MD5.
@@ -547,7 +496,6 @@ graph TD
   - `routes/certifications_bp.py`
   - `routes/reconciliation_bp.py`
   - `routes/reports_bp.py`
-  - `routes/reports_helpers.py`
   - `routes/settings_bp.py`
   - `routes/transactions_bp.py`
 - **`services/`** — Lógica de negocio contable (FIFO, huecos, custodia mensual, conciliación, caché, impuestos).
@@ -569,6 +517,7 @@ graph TD
   - `services/orphan_transfer_service.py`
   - `services/price_lookup_service.py`
   - `services/reconciliation_service.py`
+  - `services/reports_helpers.py`
   - `services/source_declarations_service.py`
   - `services/source_freshness_service.py`
   - `services/tax_anomaly_service.py`

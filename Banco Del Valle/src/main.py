@@ -46,9 +46,26 @@ app.include_router(router_dashboard)
 app.include_router(router_websocket)
 
 
+import os
+from fastapi import Request
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
+# Ruta de distribución compilada de frontend Vite
+frontend_dist = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist"))
+assets_dir = os.path.join(frontend_dist, "assets")
+
+if os.path.isdir(assets_dir):
+    app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+
 @app.get("/")
-def estado_servidor():
-    """Endpoint de comprobación de salud (Health Check) del core bancario."""
+def estado_servidor(request: Request):
+    """Endpoint raíz: entrega la SPA si es un navegador web o JSON de salud."""
+    accept = request.headers.get("accept", "")
+    index_file = os.path.join(frontend_dist, "index.html")
+    if "text/html" in accept and os.path.isfile(index_file):
+        return FileResponse(index_file)
     return {
         "entidad": "Banco del Valle — San Fernando del Valle de Catamarca",
         "estado": "ONLINE",
@@ -56,6 +73,20 @@ def estado_servidor():
         "docs_swagger": "/docs",
         "version": "1.0.0",
     }
+
+
+@app.get("/{full_path:path}")
+async def catch_all_spa(request: Request, full_path: str):
+    """Fallback para navegación en cliente (SPA React Router) y recursos estáticos."""
+    accept = request.headers.get("accept", "")
+    static_file = os.path.join(frontend_dist, full_path)
+    if os.path.isfile(static_file):
+        return FileResponse(static_file)
+    index_file = os.path.join(frontend_dist, "index.html")
+    if "text/html" in accept and os.path.isfile(index_file):
+        return FileResponse(index_file)
+    from fastapi import HTTPException
+    raise HTTPException(status_code=404, detail="Ruta no encontrada")
 
 
 if __name__ == "__main__":
