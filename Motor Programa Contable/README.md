@@ -86,7 +86,7 @@ Tienes tres formas de iniciar el sistema desde la raíz del proyecto:
   * `webapp/frontend/`: Interfaz visual web construida en React + Vite.
 * **[docs/](docs):** Documentación técnica y arquitectónica en profundidad. Consulta [docs/LOGICA_CORE_FIFO_MATCHING_SANEAMIENTO.md](docs/LOGICA_CORE_FIFO_MATCHING_SANEAMIENTO.md) para el desglose detallado de módulos, funciones, imports y algoritmos del motor FIFO, matching bancario/inter-exchange, saneamiento y auditoría de ledger.
 * **[scripts/](scripts):** Utilidades CLI, auditoría de arquitectura y herramientas de verificación (`audit_deep_system.py`, `enforce_clean_roots.py`, `verify_fifo_cli.py`, `verify_operational_excel_cli.py`, `verify_real_flow_cli.py`).
-* **Archivos Raíz:** Únicamente archivos de configuración (`mappings.json`), documentación (`README.md`, `PROJECT.md`, `TEST_READY.md`, `TEST_INFRA.md`), lanzadores (`.vbs`, `.bat`, `start_system.py`, `stop_system.py`) y recursos visuales (`app.ico`).
+* **Archivos Raíz:** Únicamente archivos de configuración (`mappings.json`), documentación central (`README.md`, `PROJECT.md`), lanzadores (`.vbs`, `.bat`, `start_system.py`, `stop_system.py`) y recursos visuales (`app.ico`).
 
 ---
 

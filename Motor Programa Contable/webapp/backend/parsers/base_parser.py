@@ -16,7 +16,7 @@ try:
 except ImportError:
     try:
         import config_manager
-        from exceptions import MissingColumnsError
+        from utils.exceptions import MissingColumnsError
     except ImportError:
         from compat import config_manager  # type: ignore
         from compat.exceptions import MissingColumnsError  # type: ignore

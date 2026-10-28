@@ -2,7 +2,7 @@
 Helper functions for Ripio parsers and API trade normalization.
 """
 import pandas as pd
-from exceptions import MissingColumnsError
+from utils.exceptions import MissingColumnsError
 try:
     from .base_parser import parse_date, create_transaction, get_usd_ars_rate
 except ImportError:

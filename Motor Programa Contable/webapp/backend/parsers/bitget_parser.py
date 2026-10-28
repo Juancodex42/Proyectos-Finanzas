@@ -1,6 +1,6 @@
 import re
 import pandas as pd
-from exceptions import MissingColumnsError
+from utils.exceptions import MissingColumnsError
 
 try:
     from .base_parser import (

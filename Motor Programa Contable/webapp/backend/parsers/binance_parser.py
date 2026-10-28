@@ -3,7 +3,7 @@ import io
 import re
 import logging
 import pandas as pd
-from exceptions import MissingColumnsError
+from utils.exceptions import MissingColumnsError
 
 logger = logging.getLogger(__name__)
 

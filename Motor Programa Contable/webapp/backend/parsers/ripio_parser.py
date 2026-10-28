@@ -4,7 +4,7 @@ try:
     from services import config_service as config_manager
 except ImportError:
     import config_manager
-from exceptions import MissingColumnsError
+from utils.exceptions import MissingColumnsError
 
 try:
     from .base_parser import (_normalize_text, parse_date, clean_decimal, find_column_fuzzy, validate_columns, is_cancelled_transaction, create_transaction, get_usd_ars_rate)

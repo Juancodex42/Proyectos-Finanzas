@@ -66,7 +66,8 @@ Every feature from the Survey phase is enumerated here with its assigned milesto
 - Crypto-crypto swap valuation: assign ARS value to quote asset at swap timestamp.
 
 ## Code Layout
-- Main backend packages: `webapp/backend/{db,models,services,parsers,api_clients,routes,compat,utils}/`
+- Main backend packages: `webapp/backend/{db,models,services,parsers,api_clients,routes,compat,utils,domain,workers}/`
+- Database: `webapp/backend/transactions.db` (accedida mediante `webapp/backend/db/connection.py`)
 - Frontend application: `webapp/frontend/src/{pages,components,utils}/`
 - Test suite: `webapp/backend/tests/test_*.py`, `webapp/backend/tests/conftest.py`
 - Verification & governance CLI scripts: `scripts/{audit_deep_system.py,enforce_clean_roots.py,verify_fifo_cli.py,verify_operational_excel_cli.py,verify_real_flow_cli.py}`

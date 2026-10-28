@@ -7,10 +7,7 @@ import sys
 import zipfile
 import pandas as pd
 
-try:
-    from exceptions import MissingColumnsError
-except ImportError:
-    from utils.exceptions import MissingColumnsError
+from utils.exceptions import MissingColumnsError
 
 from .base_parser import extract_preview_columns
 from .binance_parser import process_binance_csv

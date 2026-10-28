@@ -4,6 +4,7 @@ and verify that all formulas, balances, and sheets match the accountant's model.
 """
 import sys
 import os
+import tempfile
 import openpyxl
 
 BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'webapp', 'backend'))
@@ -83,7 +84,7 @@ def test_generate_and_inspect_operational_excel():
     print("2. Generando Excel Operativo con Fórmulas Vivas...")
     excel_buf = generate_operational_excel(all_txs, options)
     
-    test_path = os.path.join(os.path.dirname(__file__), 'test_operational_out.xlsx')
+    test_path = os.path.join(tempfile.gettempdir(), 'test_operational_out.xlsx')
     try:
         with open(test_path, 'wb') as f:
             f.write(excel_buf.getvalue())

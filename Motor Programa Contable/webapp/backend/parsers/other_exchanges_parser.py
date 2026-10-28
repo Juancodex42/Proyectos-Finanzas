@@ -8,10 +8,7 @@ logger = logging.getLogger(__name__)
 try:
     from utils.exceptions import MissingColumnsError
 except ImportError:
-    try:
-        from exceptions import MissingColumnsError
-    except ImportError:
-        from compat.exceptions import MissingColumnsError
+    from compat.exceptions import MissingColumnsError
 
 try:
     from .base_parser import (

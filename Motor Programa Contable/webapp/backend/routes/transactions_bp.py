@@ -4,7 +4,7 @@ import logging
 from flask import Blueprint, request, jsonify, send_file
 import db_manager
 import processor_lib
-from exceptions import MissingColumnsError
+from utils.exceptions import MissingColumnsError
 try:
     from services.cache_service import invalidate_Dashboard_Cache
 except ImportError:

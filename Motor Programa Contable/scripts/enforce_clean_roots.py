@@ -30,7 +30,7 @@ FRONTEND_DIR = REPO_ROOT / "webapp" / "frontend"
 DOCS_ARCHIVE = REPO_ROOT / "docs" / "archive"
 
 ALLOWED_REPO_ROOT_FILES = {
-    "project.md", "readme.md", "test_infra.md", "test_ready.md",
+    "project.md", "readme.md",
     "mappings.json", ".gitignore",
     "start_system.py", "stop_system.py", "run_app.bat", "stop_app.bat",
     "launch_silent.vbs", "launch_autosync_silent.vbs", "setup_windows_scheduler.ps1",
@@ -38,13 +38,13 @@ ALLOWED_REPO_ROOT_FILES = {
 }
 ALLOWED_REPO_ROOT_DIRS = {
     ".agents", ".git", ".vscode", ".pytest_cache", "__pycache__",
-    "docs", "scripts", "webapp", ".mypy_cache"
+    "docs", "scripts", "webapp", ".mypy_cache", "backups"
 }
 
 ALLOWED_BACKEND_ROOT_FILES = {
     "app.py", "requirements.txt", ".env", ".env.example", "transactions.db",
     "transactions.db-wal", "transactions.db-shm", "transactions.db-journal",
-    "backend_runtime.log", "conftest.py", "exceptions.py"
+    "backend_runtime.log"
 }
 ALLOWED_BACKEND_ROOT_DIRS = {
     "api_clients", "compat", "db", "domain", "models", "parsers",

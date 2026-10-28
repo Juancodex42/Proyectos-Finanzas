@@ -5,39 +5,69 @@
 
 const BASE_URL = '';
 
-/**
- * Obtiene el token JWT persistido en el almacenamiento local.
- */
-export function getAuthToken() {
-  return localStorage.getItem('valle_auth_token') || null;
-}
-
-/**
- * Persiste el token JWT y el perfil de sesión.
- */
-export function setAuthToken(token, user) {
-  if (token) {
-    localStorage.setItem('valle_auth_token', token);
-  } else {
+// Limpieza preventiva inmediata de credenciales persistidas en localStorage legacy
+try {
+  if (typeof window !== 'undefined') {
     localStorage.removeItem('valle_auth_token');
-  }
-  if (user) {
-    localStorage.setItem('valle_auth_user', JSON.stringify(user));
-  } else {
     localStorage.removeItem('valle_auth_user');
   }
+} catch {
+  // Ignorar si el acceso a localStorage está restringido
 }
 
 /**
- * Recupera el usuario autenticado desde el almacenamiento local.
+ * Obtiene el token JWT desde el almacenamiento de sesión efímero (sessionStorage).
+ */
+export function getAuthToken() {
+  try {
+    if (typeof window !== 'undefined') {
+      // Garantizar que no queden residuos en localStorage
+      if (localStorage.getItem('valle_auth_token')) {
+        localStorage.removeItem('valle_auth_token');
+        localStorage.removeItem('valle_auth_user');
+      }
+      return sessionStorage.getItem('valle_auth_token') || null;
+    }
+  } catch {}
+  return null;
+}
+
+/**
+ * Persiste el token JWT y el perfil de sesión solo durante la sesión activa (sessionStorage).
+ */
+export function setAuthToken(token, user) {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('valle_auth_token');
+      localStorage.removeItem('valle_auth_user');
+
+      if (token) {
+        sessionStorage.setItem('valle_auth_token', token);
+      } else {
+        sessionStorage.removeItem('valle_auth_token');
+      }
+      if (user) {
+        sessionStorage.setItem('valle_auth_user', JSON.stringify(user));
+      } else {
+        sessionStorage.removeItem('valle_auth_user');
+      }
+    }
+  } catch {}
+}
+
+/**
+ * Recupera el usuario autenticado desde el almacenamiento de sesión (sessionStorage).
  */
 export function getAuthUser() {
-  const raw = localStorage.getItem('valle_auth_user');
   try {
-    return raw ? JSON.parse(raw) : null;
+    if (typeof window !== 'undefined') {
+      const raw = sessionStorage.getItem('valle_auth_user');
+      return raw ? JSON.parse(raw) : null;
+    }
   } catch {
     return null;
   }
+  return null;
 }
 
 /**

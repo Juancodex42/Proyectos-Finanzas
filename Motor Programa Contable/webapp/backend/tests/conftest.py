@@ -2,7 +2,8 @@ import os
 import sys
 import pytest
 
-BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
+BACKEND_DIR = os.path.dirname(TESTS_DIR)
 COMPAT_DIR = os.path.join(BACKEND_DIR, "compat")
 
 for p in [BACKEND_DIR, COMPAT_DIR]:

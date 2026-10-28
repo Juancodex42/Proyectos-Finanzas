@@ -18,6 +18,7 @@
 *.sqlite3
 test_temp*.db
 certifications.db
+backups/
 
 # 3. Uploads y Datos Privados de Usuario
 webapp/backend/uploads/*
