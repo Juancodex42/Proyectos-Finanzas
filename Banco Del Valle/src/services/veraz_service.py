@@ -56,7 +56,7 @@ def consultar_buro_externo(
             cheques_rechazados_monto=50000.0 if peor_sit >= 3 else 0.0,
         )
 
-    # Caso 2: Clientes conocidos por defecto (Juan José Gonzalez y PyME Minería)
+    # Caso 2: Clientes conocidos por defecto (Juan José Cano y PyME Minería)
     if doc_limpio in ("35123456", "30712345678"):
         return HistorialVeraz(
             persona_id=persona_id,

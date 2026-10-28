@@ -269,5 +269,5 @@ def test_reset_database(sim_db):
 
     persona_juan = persona_repo.obtener_persona_por_dni(conn, "35123456")
     assert persona_juan is not None
-    assert persona_juan.nombre_completo == "Juan José Gonzalez"
+    assert persona_juan.nombre_completo == "Juan José Cano"
 

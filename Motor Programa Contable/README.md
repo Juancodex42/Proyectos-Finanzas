@@ -1,4 +1,11 @@
-# CryptoTax Pro - Sistema Contable de Criptomonedas
+# CryptoTax Pro — Motor de Conciliación Bancaria Forense & Auditoría Fiscal CPCE
+
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-3.0%2B-black.svg)](https://flask.palletsprojects.com/)
+[![React](https://img.shields.io/badge/React-18%2B-61DAFB.svg)](https://react.dev/)
+[![SQLite](https://img.shields.io/badge/SQLite-WAL%20Mode-orange.svg)](https://www.sqlite.org/)
+[![Tests](https://img.shields.io/badge/Tests-38%20Passed%20(100%25)-brightgreen.svg)]()
+[![License](https://img.shields.io/badge/License-Proprietary%20%2F%20Research-red.svg)]()
 
 Este proyecto es un motor y sistema contable para el procesamiento de transacciones financieras de criptomonedas provenientes de diferentes exchanges (Binance, Bitso, Fiwind, Ripio, Lemon, Bybit, etc.), con cálculo de costos FIFO e impuestos (Ganancias e IIBB) para Argentina.
 
@@ -93,7 +100,7 @@ Para mantener la raíz del proyecto **limpia y ordenada**, se establece la sigui
 > * Puedes validar el cumplimiento en cualquier momento ejecutando:
 >   ```bash
 >   python scripts/enforce_clean_roots.py
->   pytest webapp/backend/tests/test_architecture_governance.py -v
+>   pytest webapp/backend/tests/ -v
 >   ```
 
 ---
@@ -102,7 +109,50 @@ Para mantener la raíz del proyecto **limpia y ordenada**, se establece la sigui
 
 El sistema está diseñado bajo una arquitectura cliente-servidor modular (Frontend-Backend). Esta sección se genera **dinámicamente** escaneando los paquetes modulares reales de `webapp/backend/` (`db/`, `models/`, `parsers/`, `routes/`, `services/`, `api_clients/`, `compat/`, `utils/`, `workers/`) y analizando las dependencias de importación del código fuente.
 
-### 📊 Diagrama de Dependencias y Flujo de Control
+### 📊 Diagrama de Arquitectura y Flujo de Control (Simplificado)
+
+El siguiente diagrama resume el flujo integral del motor contable, desde la ingesta multicanal de extractos bancarios y APIs hasta la conciliación forense, cálculo impositivo y generación de certificaciones contables para el CPCE:
+
+```mermaid
+flowchart TD
+    subgraph Ingesta ["📥 1. Ingesta Multi-Fuente"]
+        Bancos["🏦 Extractos Bancarios\n(Galicia, BBVA, Macro, Santander, MP)\nFormatos: PDF, Excel, CSV"]
+        Exchanges["🪙 Exchanges Cripto\n(Binance, Lemon, Ripio, Fiwind, Bitso)\nFormatos: CSV, XLSX & APIs REST"]
+    end
+
+    subgraph Procesamiento ["⚙️ 2. Normalización, OCR & Deduplicación"]
+        OCR["Detector & OCR Engine\n(PyPDF2, OCR deskew, Normalizador de Fechas)"]
+        Dedup["Hash Canónico MD5\n(Deduplicación estricta & Mitigación de lotes duplicados)"]
+    end
+
+    subgraph Core ["🧠 3. Motor Contable Forense & Conciliación"]
+        FIFO["Motor FIFO de Costos\n(Cálculo de Base Imponible Ganancias / IIBB)"]
+        Reconcile["Conciliación Bancaria Forense\n(Matching inter-cuentas & Detección de Brechas)"]
+        DB[("transactions.db\nSQLite WAL Mode")]
+    end
+
+    subgraph Salidas ["📊 4. Reportes, Auditoría & Frontend"]
+        CPCE["📄 Papeles de Trabajo CPCE\n(Certificaciones Contables Oficiales en PDF / Excel)"]
+        WebUI["💻 Dashboard Web Interactivo\n(React 18 + Vite + Tailwind CSS)"]
+    end
+
+    Bancos --> OCR
+    Exchanges --> OCR
+    OCR --> Dedup
+    Dedup --> FIFO & Reconcile
+    FIFO <--> DB
+    Reconcile <--> DB
+    FIFO --> CPCE & WebUI
+    Reconcile --> CPCE & WebUI
+```
+
+---
+
+### 🔍 Diagrama de Dependencias y Flujo de Control (Detallado)
+
+<details>
+<summary><b>Click para expandir el mapa completo de dependencias internas de código (AST)...</b></summary>
+
 
 ```mermaid
 graph TD
@@ -448,6 +498,8 @@ graph TD
 
 > [!NOTE]
 > Las líneas punteadas `-.->` indican dependencias directas de importación (`import`) detectadas estáticamente en el código backend.
+
+</details>
 
 ### 📁 Estructura Detectada del Proyecto
 

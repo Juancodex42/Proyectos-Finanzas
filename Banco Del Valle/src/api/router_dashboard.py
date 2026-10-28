@@ -5,6 +5,7 @@ Referencia de diseño: docs/margen_financiero_y_proyecciones_escenarios.md
 """
 
 from datetime import date, timedelta
+import math
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Header, HTTPException, Query, Response, status
 
@@ -24,6 +25,7 @@ from src.database.repositories import (
     deposito_repo,
     movimiento_repo,
     prestamo_repo,
+    usuario_repo,
 )
 from src.domain.interest_rate import calcular_cuota_frances
 from src.domain.models import BalancePatrimonio
@@ -397,6 +399,46 @@ def _construir_respuesta_archivo(
     )
 
 
+@router.get("/api/dashboard/usuarios")
+def listar_usuarios_dashboard(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    tipo: Optional[str] = Query(None, description="INDIVIDUO o EMPRESA"),
+    estado: Optional[str] = Query(None, description="ACTIVO, BAJA_SOLICITADA, etc."),
+    busqueda: Optional[str] = Query(None, description="Búsqueda por DNI, CUIT, Nombre, Alias, Email"),
+    orden: str = Query("recientes", description="recientes, antiguos, mayor_saldo, menor_saldo"),
+):
+    """Retorna la lista paginada y filtrada del Padrón Central de Clientes (Individuos y Empresas)."""
+    offset = (page - 1) * limit
+    conn = get_db_connection()
+    try:
+        usuarios = usuario_repo.obtener_lista_usuarios_banco(
+            conn,
+            tipo_cliente=tipo,
+            estado=estado,
+            busqueda=busqueda,
+            orden=orden,
+            limite=limit,
+            offset=offset,
+        )
+        total = usuario_repo.contar_usuarios_banco(
+            conn,
+            tipo_cliente=tipo,
+            estado=estado,
+            busqueda=busqueda,
+        )
+        total_paginas = max(1, math.ceil(total / limit)) if limit > 0 else 1
+        return {
+            "usuarios": usuarios,
+            "total": total,
+            "pagina": page,
+            "total_paginas": total_paginas,
+            "limite": limit,
+        }
+    finally:
+        conn.close()
+
+
 @router.get("/api/dashboard/exportar")
 @router.get("/api/dashboard/export/{formato_path}")
 def exportar_reporte(
@@ -532,6 +574,39 @@ def exportar_reporte(
                 nombre_hoja="Cuentas Flexibles",
                 titulo_pdf="Movimientos y Rendimientos de Cuentas Flexibles",
                 subtitulo_pdf=f"Período: {f_desde} al {f_hasta} — Remuneración 28.5% TNA",
+                cols_pdf=cols,
+                filas_pdf=filas,
+            )
+
+        if modulo_objetivo in ("USUARIOS", "CLIENTES", "PADRON"):
+            usuarios = usuario_repo.obtener_lista_usuarios_banco(
+                conn,
+                tipo_cliente=None if not estado or estado.upper() not in ("INDIVIDUO", "EMPRESA") else estado,
+                estado=None if estado in ("INDIVIDUO", "EMPRESA") else estado,
+                orden="recientes",
+                limite=5000,
+                offset=0,
+            )
+            cols = ["TITULAR", "DOC FISCAL", "SEGMENTO", "SUBTIPO / ACTIVIDAD", "ESTADO", "SALDO", "PRESTAMOS"]
+            filas = [
+                [
+                    str(u.get("nombre_titular", ""))[:25],
+                    str(u.get("identificador_fiscal", "")),
+                    str(u.get("tipo_cliente", "")),
+                    str(u.get("subtipo_actividad", ""))[:25],
+                    str(u.get("estado_cliente", "")),
+                    f"${float(u.get('saldo_cuenta', 0)):,.2f}",
+                    f"{u.get('prestamos_activos', 0)} Activo(s) (${float(u.get('monto_prestamos', 0)):,.0f})" if u.get('prestamos_activos', 0) > 0 else "Sin préstamos",
+                ]
+                for u in usuarios
+            ]
+            return _construir_respuesta_archivo(
+                datos_dict=usuarios,
+                formato_limpio=formato_limpio,
+                nombre_base=f"padron_clientes_{f_hasta}",
+                nombre_hoja="Padrón Clientes",
+                titulo_pdf="Padrón Oficial de Clientes & Cuentas — Banco del Valle",
+                subtitulo_pdf=f"Generado al {f_hasta} — Titulares Individuos y Empresas",
                 cols_pdf=cols,
                 filas_pdf=filas,
             )

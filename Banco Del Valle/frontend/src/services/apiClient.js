@@ -185,6 +185,44 @@ export const apiClient = {
     return request(`/api/dashboard/proyecciones?${params.toString()}`);
   },
 
+  // Padrón Central de Clientes
+  getUsuarios: async (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.page) query.append('page', params.page);
+    if (params.limit) query.append('limit', params.limit);
+    if (params.tipo && params.tipo !== 'TODOS') query.append('tipo', params.tipo);
+    if (params.estado && params.estado !== 'TODOS') query.append('estado', params.estado);
+    if (params.busqueda) query.append('busqueda', params.busqueda);
+    if (params.orden) query.append('orden', params.orden);
+    return request(`/api/dashboard/usuarios?${query.toString()}`);
+  },
+
+  // Operaciones Normativas de Baja y Arrepentimiento (Ley 24.240 y BCRA)
+  solicitarBaja: async (payload) => {
+    return request('/api/clientes/solicitar-baja', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  solicitarArrepentimiento: async (payload) => {
+    return request('/api/clientes/arrepentimiento', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  exportarUsuarios: async (formato = 'csv') => {
+    const token = getAuthToken();
+    const response = await fetch(`/api/dashboard/exportar?modulo=USUARIOS&formato=${formato}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!response.ok) {
+      throw new Error(`Error descargando padrón: ${response.statusText}`);
+    }
+    return response.blob();
+  },
+
   // Descarga y Exportación Universal
   exportarArchivo: async ({ modulo, formato, fechaInicio, fechaFin, estado }) => {
     const params = new URLSearchParams({

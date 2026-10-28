@@ -165,7 +165,14 @@ El módulo `AntiBanValidator` audita **todas las decisiones en memoria antes de 
 Bot P2P Binance/
 │
 ├── main.py                         # Punto de entrada de la aplicación (< 70 líneas)
+├── launcher.py                     # Lanzador desacoplado en segundo plano (pythonw)
+├── tray_app.py                     # Proceso daemon con System Tray y visor de logs
+├── INICIAR_MODO_DEMO.bat           # Lanzador interactivo con Modo Demo Zero-API y Tests
+├── INICIAR_BOT_ORIGINAL.bat        # Script de arranque directo del Bot Original (Producción)
 ├── pytest.ini                      # Configuración de pruebas con pythonpath = src .
+├── requirements.txt                # Dependencias de producción y testing
+├── .env.example                    # Plantilla de variables de entorno (segura)
+├── .gitignore                      # Reglas de exclusión de Git (logs, credenciales, SQLite)
 │
 ├── src/                            # Arquitectura src-layout genuina (< 450 líneas por archivo)
 │   ├── config/                     # Configuración central y constantes inmutables
@@ -207,37 +214,23 @@ Bot P2P Binance/
 │       ├── broadcaster.py          # Notificaciones push y broadcast
 │       └── formatters/             # Formateadores Markdown v2 especializados
 │
-├── tests/                          # 210 pruebas unitarias y de integración (100% PASS)
-├── scripts/                        # Utilidades operacionales y scripts de diagnóstico
-├── docs/                           # Documentación técnica y arquitectura
-└── logs/                           # Directorio aislado de logs de ejecución
-│   │   ├── commands.py             # Comandos administrativos y gestión de texto
-│   │   └── utils.py                # Parseo numérico y validación de entradas
-│   ├── __init__.py
-│   ├── bot.py                      # Clase orquestadora TelegramBot y loop de polling
-│   └── formatters.py               # Renderizado de dashboards y alertas en Markdown
-│
-├── tests/                          # Suite integral de pruebas automatizadas (210 tests - 100% passing)
+├── tests/                          # 20 suites automatizadas (210 tests - 100% PASS)
 │   ├── test_core_units.py          # Tests unitarios del motor principal, modelos y cálculos
 │   ├── test_audit_fixes.py         # Verificación de parches críticos de concurrencia
 │   ├── test_fiwind_arbitrage_flow.py # Pruebas del flujo de oráculo y rescate
 │   ├── test_sell_repositioner.py   # Verificación de lógica Opción A y colisiones
 │   ├── test_telegram_dashboard.py  # Tests de renderizado de UI de Telegram
-│   └── ...                         # 20 suites completas de pruebas (210 tests)
+│   └── ...                         # Suites completas de pruebas unitarias y de integración
+│
+├── scripts/                        # Utilidades operacionales y scripts de diagnóstico
+│   ├── verify_connection.py        # Smoke test de conectividad
+│   └── compact_db.py               # Destilación y compactación de base de datos
 │
 ├── docs/                           # 📚 Documentación técnica especializada
 │   ├── DOCUMENTACION_TECNICA.md    # Arquitectura profunda, matemáticas y flujos
 │   └── REGLAS_ANTIBANEO_P2P.md     # Documentación de reglas y compliance anti-baneo
 │
-├── .env.example                    # Plantilla de variables de entorno (segura)
-├── .gitignore                      # Reglas de exclusión de Git (logs, credenciales, SQLite)
-├── INICIAR_BOT_ORIGINAL.bat        # Script de arranque directo del Bot Original (Producción)
-├── INICIAR_MODO_DEMO.bat           # Lanzador interactivo con Modo Demo Zero-API y Tests
-├── launcher.py                     # Lanzador desacoplado en segundo plano (pythonw)
-├── main.py                         # Orquestador del loop principal del bot
-├── pytest.ini                      # Configuración de pruebas automatizadas
-├── requirements.txt                # Dependencias de producción y testing
-└── tray_app.py                     # Proceso daemon con System Tray y visor de logs
+└── logs/                           # Directorio aislado de logs de ejecución
 ```
 
 ---
@@ -249,10 +242,9 @@ Bot P2P Binance/
 - Cuenta de Comerciante / Maker en Binance con permisos de API C2C activados.
 - Token de Bot de Telegram (obtenido a través de [@BotFather](https://t.me/BotFather)).
 
-### 1. Clonar el repositorio y crear entorno virtual
+### 1. Navegar al proyecto y crear entorno virtual
 ```bash
-git clone https://github.com/tu-usuario/binance-p2p-engine.git
-cd binance-p2p-engine
+cd "Bot P2P Binance"
 
 python -m venv venv
 # En Windows:
@@ -266,10 +258,13 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Configurar credenciales
-Copia el archivo de ejemplo y completa tus claves:
+### 3. Configurar credenciales (Opcional para Modo Demo)
+Copia el archivo de plantilla y completa tus claves si deseas operar en vivo:
 ```bash
-cp config/.env.example config/.env
+# En Windows (PowerShell / CMD):
+copy .env.example .env
+# En Linux / macOS:
+cp .env.example .env
 ```
 
 ### 4. Ejecutar verificación de conexión (Smoke Test)
@@ -344,7 +339,7 @@ pytest tests/test_core_units.py -v
 
 ## 📄 Licencia
 
-Este proyecto se distribuye bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
+Este proyecto es de uso privado e institucional para investigación cuantitativa y trading algorítmico. Todos los derechos reservados. Consulte los lineamientos de propiedad intelectual y seguridad operativa en el encabezado.
 
 ---
 

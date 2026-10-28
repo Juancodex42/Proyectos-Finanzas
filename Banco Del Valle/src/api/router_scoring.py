@@ -18,6 +18,8 @@ from src.api.schemas import (
     SimularDepositoRequest,
     SimularEmpresaRequest,
     SimularPrestamoRequest,
+    SolicitudArrepentimientoRequest,
+    SolicitudBajaRequest,
     TransferenciaRequest,
     normalizar_categoria_laboral,
 )
@@ -35,9 +37,10 @@ from src.database.repositories import (
     empresa_repo,
     movimiento_repo,
     persona_repo,
+    prestamo_repo,
     usuario_repo,
 )
-from src.domain.compliance_aml import evaluar_transaccion_aml
+from src.domain.compliance_aml import evaluar_transaccion_aml, validar_factibilidad_cierre_cuenta
 from src.domain.interest_rate import (
     calcular_interes_flexible_diario,
     calcular_interes_plazo_fijo,
@@ -46,6 +49,7 @@ from src.domain.interest_rate import (
 )
 from src.domain.models import (
     CategoriaLaboral,
+    EstadoCuenta,
     EstadoPlazoFijo,
     MovimientoCuenta,
     PlazoFijo,
@@ -322,11 +326,16 @@ def login(req: LoginRequest):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=error)
 
         rol_str = usuario.rol.value if hasattr(usuario.rol, "value") else str(usuario.rol)
-        nombre_display = (
-            "Juan José Gonzalez"
-            if usuario.persona_id == 1
-            else ("Gerencia Ejecutiva" if rol_str == "GERENTE" else usuario.identificador)
-        )
+        if usuario.persona_id:
+            p = persona_repo.obtener_persona_por_id(conn, usuario.persona_id)
+            nombre_display = p.nombre_completo if p else "Juan José Cano"
+        elif usuario.empresa_id:
+            e = empresa_repo.obtener_empresa_por_id(conn, usuario.empresa_id)
+            nombre_display = e.razon_social if e else usuario.identificador
+        elif rol_str == "GERENTE":
+            nombre_display = "Gerencia Ejecutiva"
+        else:
+            nombre_display = usuario.identificador
 
         user_payload = {
             "id": usuario.id,
@@ -344,6 +353,7 @@ def login(req: LoginRequest):
             "empresa_id": usuario.empresa_id,
             "identificador": usuario.identificador,
             "email": usuario.email,
+            "nombre": nombre_display,
             "rol": rol_str,
             "token": token,
             "access_token": token,
@@ -457,7 +467,7 @@ def resumen_cliente(
         )
 
         return {
-            "titular": persona.nombre_completo if persona else "Juan José Gonzalez",
+            "titular": persona.nombre_completo if persona else "Juan José Cano",
             "dni_cuit": persona.dni if persona else "35123456",
             "cuenta_id": cuenta.id,
             "cbu": cuenta.cbu,
@@ -477,7 +487,7 @@ def resumen_cliente(
             },
             "persona": {
                 "id": persona.id if persona else target_persona_id,
-                "nombre_completo": persona.nombre_completo if persona else "Juan José Gonzalez",
+                "nombre_completo": persona.nombre_completo if persona else "Juan José Cano",
                 "dni": persona.dni if persona else "35123456",
                 "categoria_laboral": cat_str,
                 "ingreso_mensual_comprobado": persona.ingreso_mensual_comprobado if persona else 3000000.0,
@@ -701,3 +711,188 @@ def cancelar_plazo_fijo_anticipado(plazo_fijo_id: int, authorization: Optional[s
             "nuevo_saldo_cuenta": nuevo_saldo,
             "estado": "CANCELADO_ANTICIPADO",
         }
+
+
+# ============================================================================
+# Endpoints de Baja de Cuenta y Botón de Arrepentimiento (Ley 24.240 & BCRA)
+# ============================================================================
+
+@router.post("/api/clientes/solicitar-baja")
+def solicitar_baja_cuenta(req: SolicitudBajaRequest, authorization: Optional[str] = Header(None)):
+    """
+    Solicitud oficial de baja de cuenta y servicios bancarios (Ley 24.240 y BCRA).
+    Aplica validación estricta de factibilidad de cierre (sin deuda ni saldos) y Soft Delete (Ley 25.246).
+    """
+    conn = get_db_connection()
+    try:
+        ident = req.identificador.strip() if req.identificador else None
+        persona = None
+        empresa = None
+
+        if ident:
+            solo_digitos = re.sub(r"\D", "", ident)
+            if len(solo_digitos) in (7, 8):
+                persona = persona_repo.obtener_persona_por_dni(conn, solo_digitos)
+            elif len(solo_digitos) == 11:
+                persona = persona_repo.obtener_persona_por_dni(conn, solo_digitos)
+                if not persona:
+                    empresa = empresa_repo.obtener_empresa_por_cuit(conn, solo_digitos)
+            if not persona and not empresa:
+                u = usuario_repo.obtener_usuario_por_identificador(conn, ident) or usuario_repo.obtener_usuario_por_email(conn, ident)
+                if u and u.persona_id:
+                    persona = persona_repo.obtener_persona_por_id(conn, u.persona_id)
+                elif u and u.empresa_id:
+                    empresa = empresa_repo.obtener_empresa_por_id(conn, u.empresa_id)
+
+        if not persona and not empresa:
+            pid = _resolver_persona_id(conn, authorization, fallback_persona_id=None)
+            if pid:
+                persona = persona_repo.obtener_persona_por_id(conn, pid)
+
+        if not persona and not empresa:
+            raise HTTPException(status_code=404, detail="No se encontró una cuenta o titular asociado a los datos ingresados.")
+
+        if persona:
+            cuentas = cuenta_repo.obtener_cuentas_por_persona(conn, persona.id)
+            saldo_total = sum(c.saldo_actual for c in cuentas) if cuentas else 0.0
+            prestamos = prestamo_repo.obtener_prestamos_por_persona(conn, persona.id)
+            deuda_activa = sum(
+                p.monto_capital for p in prestamos
+                if (p.estado.value if hasattr(p.estado, "value") else str(p.estado)) in ("ACTIVO", "AL_DIA", "EN_MORA")
+            )
+            pfs = deposito_repo.obtener_plazos_fijos_por_persona(conn, persona.id)
+            pfs_vigentes = len([
+                pf for pf in pfs
+                if (pf.estado.value if hasattr(pf.estado, "value") else str(pf.estado)) == "ACTIVO"
+            ])
+        else:
+            cuentas = cuenta_repo.obtener_cuentas_por_empresa(conn, empresa.id)
+            saldo_total = sum(c.saldo_actual for c in cuentas) if cuentas else 0.0
+            prestamos = prestamo_repo.obtener_prestamos_por_empresa(conn, empresa.id)
+            deuda_activa = sum(
+                p.monto_capital for p in prestamos
+                if (p.estado.value if hasattr(p.estado, "value") else str(p.estado)) in ("ACTIVO", "AL_DIA", "EN_MORA")
+            )
+            pfs = deposito_repo.obtener_plazos_fijos_por_empresa(conn, empresa.id)
+            pfs_vigentes = len([
+                pf for pf in pfs
+                if (pf.estado.value if hasattr(pf.estado, "value") else str(pf.estado)) == "ACTIVO"
+            ])
+
+        autorizado, motivo_legal = validar_factibilidad_cierre_cuenta(
+            saldo_disponible=saldo_total,
+            deuda_prestamos=deuda_activa,
+            plazos_fijos_vigentes=pfs_vigentes,
+        )
+
+        if not autorizado:
+            raise HTTPException(status_code=400, detail=motivo_legal)
+
+        import random
+        from datetime import datetime
+        nro_tramite = f"BAJA-{datetime.now().strftime('%Y%m%d')}-{random.randint(100000, 999999)}"
+
+        with transaction() as tx_conn:
+            if persona:
+                persona_repo.actualizar_estado_persona(tx_conn, persona.id, EstadoCuenta.BAJA_SOLICITADA)
+                for c in cuentas:
+                    cuenta_repo.actualizar_estado_cuenta(tx_conn, c.id, EstadoCuenta.CERRADO)
+            else:
+                empresa_repo.actualizar_estado_empresa(tx_conn, empresa.id, EstadoCuenta.BAJA_SOLICITADA)
+                for c in cuentas:
+                    cuenta_repo.actualizar_estado_cuenta(tx_conn, c.id, EstadoCuenta.CERRADO)
+
+        return {
+            "exito": True,
+            "mensaje": "Tu solicitud de baja de cuenta ha sido autorizada y procesada conforme a las disposiciones del BCRA y Ley 24.240.",
+            "numero_tramite": nro_tramite,
+            "estado": "BAJA_SOLICITADA",
+            "titular": persona.nombre_completo if persona else empresa.razon_social,
+            "motivo_legal": motivo_legal,
+        }
+    finally:
+        conn.close()
+
+
+@router.post("/api/clientes/arrepentimiento")
+def ejercer_arrepentimiento(req: SolicitudArrepentimientoRequest, authorization: Optional[str] = Header(None)):
+    """
+    Botón de Arrepentimiento conforme Ley 24.240 y Comunicación BCRA A-6806.
+    Permite revocar la contratación de un producto (préstamo o plazo fijo) dentro de los 10 días hábiles.
+    """
+    conn = get_db_connection()
+    try:
+        ident = req.identificador.strip() if req.identificador else None
+        persona = None
+        empresa = None
+        if ident:
+            solo_digitos = re.sub(r"\D", "", ident)
+            if len(solo_digitos) in (7, 8):
+                persona = persona_repo.obtener_persona_por_dni(conn, solo_digitos)
+            elif len(solo_digitos) == 11:
+                persona = persona_repo.obtener_persona_por_dni(conn, solo_digitos) or empresa_repo.obtener_empresa_por_cuit(conn, solo_digitos)
+            if not persona and not empresa:
+                u = usuario_repo.obtener_usuario_por_identificador(conn, ident) or usuario_repo.obtener_usuario_por_email(conn, ident)
+                if u and u.persona_id:
+                    persona = persona_repo.obtener_persona_por_id(conn, u.persona_id)
+                elif u and u.empresa_id:
+                    empresa = empresa_repo.obtener_empresa_por_id(conn, u.empresa_id)
+
+        if not persona and not empresa:
+            pid = _resolver_persona_id(conn, authorization, fallback_persona_id=None)
+            if pid:
+                persona = persona_repo.obtener_persona_por_id(conn, pid)
+
+        if not persona and not empresa:
+            persona = persona_repo.obtener_persona_por_id(conn, 1)
+
+        tipo_prod = (req.tipo_producto or "PRESTAMO").upper().strip()
+        import random
+        from datetime import datetime
+        nro_tramite = f"ARREP-{datetime.now().strftime('%Y%m%d')}-{random.randint(100000, 999999)}"
+
+        if "PLAZO" in tipo_prod:
+            p_id = persona.id if persona else None
+            pfs = deposito_repo.obtener_plazos_fijos_por_persona(conn, p_id) if p_id else deposito_repo.obtener_plazos_fijos_por_empresa(conn, empresa.id)
+            pfs_activos = [pf for pf in pfs if (pf.estado.value if hasattr(pf.estado, "value") else str(pf.estado)) == "ACTIVO"]
+            if not pfs_activos:
+                raise HTTPException(status_code=400, detail="No se encontraron certificados de plazo fijo activos susceptibles de revocación.")
+            pf_target = pfs_activos[-1] if not req.producto_id else next((pf for pf in pfs_activos if pf.id == req.producto_id), pfs_activos[-1])
+            with transaction() as tx_conn:
+                cuentas = cuenta_repo.obtener_cuentas_por_persona(tx_conn, p_id) if p_id else cuenta_repo.obtener_cuentas_por_empresa(tx_conn, empresa.id)
+                if cuentas:
+                    c = cuentas[0]
+                    cuenta_repo.actualizar_saldo(tx_conn, c.id, round(c.saldo_actual + pf_target.monto_depositado, 2))
+                deposito_repo.actualizar_estado_plazo_fijo(tx_conn, pf_target.id, EstadoPlazoFijo.CANCELADO_ANTICIPADO)
+
+            return {
+                "exito": True,
+                "mensaje": f"Se ha ejercido el derecho de revocación s/ Ley 24.240 sobre el Plazo Fijo #{pf_target.id}. Capital reintegrado sin cargos ni penalidades.",
+                "numero_tramite": nro_tramite,
+                "producto": "Plazo Fijo Tradicional",
+                "monto_reintegrado": pf_target.monto_depositado,
+            }
+
+        prestamos = prestamo_repo.obtener_prestamos_por_persona(conn, persona.id) if persona else prestamo_repo.obtener_prestamos_por_empresa(conn, empresa.id)
+        prestamos_activos = [p for p in prestamos if (p.estado.value if hasattr(p.estado, "value") else str(p.estado)) in ("ACTIVO", "AL_DIA")]
+        if not prestamos_activos:
+            return {
+                "exito": True,
+                "mensaje": "Tu solicitud de arrepentimiento ha sido registrada exitosamente conforme Ley 24.240 y normativa BCRA.",
+                "numero_tramite": nro_tramite,
+                "producto": "Servicio Financiero Bancario",
+            }
+
+        p_target = prestamos_activos[-1] if not req.producto_id else next((p for p in prestamos_activos if p.id == req.producto_id), prestamos_activos[-1])
+        with transaction() as tx_conn:
+            prestamo_repo.actualizar_estado_prestamo(tx_conn, p_target.id, "CANCELADO")
+
+        return {
+            "exito": True,
+            "mensaje": f"Se ha ejercido el derecho de revocación s/ Ley 24.240 sobre el Préstamo #{p_target.id}. El contrato ha sido revocado y cancelado.",
+            "numero_tramite": nro_tramite,
+            "producto": f"Préstamo #{p_target.id}",
+            "monto_capital": p_target.monto_capital,
+        }
+    finally:
+        conn.close()

@@ -369,7 +369,7 @@ def exportar_a_pdf(
 def exportar_extracto_cuenta(
     movimientos: List[Dict[str, Any]],
     formato: str = "pdf",
-    titular: str = "Juan José Gonzalez",
+    titular: str = "Juan José Cano",
     cbu: str = "2850001211100012345678",
     alias: str = "JUAN.BANCO.VALLE",
     saldo_actual: float = 3000000.0,
@@ -429,7 +429,7 @@ def exportar_cronograma_prestamo(
     cantidad_cuotas: int,
     cuota_fija: float,
     formato: str = "pdf",
-    titular: str = "Juan José Gonzalez",
+    titular: str = "Juan José Cano",
 ) -> Tuple[bytes, str, str]:
     """Genera la cotización y tabla de amortización francesa de un crédito."""
     formato_limpio = formato.lower().strip()

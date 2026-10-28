@@ -70,7 +70,7 @@ def test_seed_demo_juan_jose(test_db):
 
     persona = persona_repo.obtener_persona_por_dni(conn, "35123456")
     assert persona is not None
-    assert persona.nombre_completo == "Juan José Gonzalez"
+    assert persona.nombre_completo == "Juan José Cano"
     assert persona.categoria_laboral == CategoriaLaboral.EMPLEADO_PRIVADO
     assert persona.ingreso_mensual_comprobado == 3000000.0
 
@@ -83,7 +83,7 @@ def test_seed_demo_juan_jose(test_db):
     usuario = usuario_repo.obtener_usuario_por_identificador(conn, "35123456")
     assert usuario is not None
     assert usuario.rol == RolUsuario.CLIENTE
-    assert usuario.email == "juan.gonzalez@valle.com.ar"
+    assert usuario.email == "juan.cano@valle.com.ar"
 
     admin = usuario_repo.obtener_usuario_por_identificador(conn, "99999999")
     assert admin is not None

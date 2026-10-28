@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrandLogo } from './BrandLogo';
 import {
   ShieldCheck,
@@ -11,9 +11,13 @@ import {
   Lock,
   Building,
   RotateCcw,
-  UserX
+  UserX,
+  AlertTriangle,
+  Loader2
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { apiClient } from '../../services/apiClient';
 import { MODAL_CONTENT } from './footerLegalContent';
 
 /**
@@ -22,28 +26,74 @@ import { MODAL_CONTENT } from './footerLegalContent';
  */
 export function Footer() {
   const { isDark } = useTheme();
+  const { user } = useAuth();
 
   const [modalDataFiscal, setModalDataFiscal] = useState(false);
   const [modalArrepentimiento, setModalArrepentimiento] = useState(false);
   const [modalBaja, setModalBaja] = useState(false);
   const [mensajeExito, setMensajeExito] = useState(null);
+  const [errorAccion, setErrorAccion] = useState(null);
+  const [loadingAccion, setLoadingAccion] = useState(false);
 
-  const handleSolicitarArrepentimiento = (e) => {
+  // Estados de formularios
+  const [dniArrep, setDniArrep] = useState('');
+  const [productoArrep, setProductoArrep] = useState('Préstamo Personal Tradicional (Sistema Francés)');
+  const [dniBaja, setDniBaja] = useState('');
+  const [servicioBaja, setServicioBaja] = useState('Caja de Ahorro Remunerada en Pesos');
+
+  useEffect(() => {
+    if (user?.identificador) {
+      setDniArrep(user.identificador);
+      setDniBaja(user.identificador);
+    }
+  }, [user]);
+
+  const handleSolicitarArrepentimiento = async (e) => {
     e.preventDefault();
-    setMensajeExito('Tu solicitud de revocación ha sido registrada. Número de trámite: REV-' + Math.floor(100000 + Math.random() * 900000));
-    setTimeout(() => {
-      setMensajeExito(null);
-      setModalArrepentimiento(false);
-    }, 3000);
+    setLoadingAccion(true);
+    setErrorAccion(null);
+    try {
+      const res = await apiClient.solicitarArrepentimiento({
+        identificador: dniArrep || user?.identificador,
+        tipo_producto: productoArrep.toLowerCase().includes('plazo') ? 'PLAZO_FIJO' : 'PRESTAMO',
+        motivo: 'Revocación voluntaria dentro de 10 días s/ Ley 24.240',
+      });
+      setMensajeExito(
+        `${res.mensaje} (Trámite: ${res.numero_tramite})`
+      );
+      setTimeout(() => {
+        setMensajeExito(null);
+        setModalArrepentimiento(false);
+      }, 5000);
+    } catch (err) {
+      setErrorAccion(err.message || 'Error procesando solicitud de revocación.');
+    } finally {
+      setLoadingAccion(false);
+    }
   };
 
-  const handleSolicitarBaja = (e) => {
+  const handleSolicitarBaja = async (e) => {
     e.preventDefault();
-    setMensajeExito('Tu solicitud de baja de producto ha sido ingresada conforme Ley 24.240. Trámite: BAJA-' + Math.floor(100000 + Math.random() * 900000));
-    setTimeout(() => {
-      setMensajeExito(null);
-      setModalBaja(false);
-    }, 3000);
+    setLoadingAccion(true);
+    setErrorAccion(null);
+    try {
+      const res = await apiClient.solicitarBaja({
+        identificador: dniBaja || user?.identificador,
+        servicio: servicioBaja,
+        motivo: 'Solicitud voluntaria del titular conforme Ley 24.240',
+      });
+      setMensajeExito(
+        `${res.mensaje} (Trámite: ${res.numero_tramite})`
+      );
+      setTimeout(() => {
+        setMensajeExito(null);
+        setModalBaja(false);
+      }, 5000);
+    } catch (err) {
+      setErrorAccion(err.message || 'Error procesando solicitud de baja.');
+    } finally {
+      setLoadingAccion(false);
+    }
   };
 
   return (
@@ -315,6 +365,14 @@ export function Footer() {
             </div>
             <div className="p-6 space-y-4">
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{MODAL_CONTENT.arrepentimiento.leyenda}</p>
+              
+              {errorAccion && (
+                <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 text-xs rounded-xl flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                  <span>{errorAccion}</span>
+                </div>
+              )}
+
               {mensajeExito ? (
                 <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-200 text-xs sm:text-sm rounded-xl font-medium flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
@@ -324,16 +382,32 @@ export function Footer() {
                 <form onSubmit={handleSolicitarArrepentimiento} className="space-y-3">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">DNI / CUIT del Titular</label>
-                    <input type="text" required placeholder="ej. 35123456" className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white dark:bg-valle-darkElevated border border-slate-300 dark:border-valle-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-valle-orange text-slate-900 dark:text-white" />
+                    <input
+                      type="text"
+                      required
+                      value={dniArrep}
+                      onChange={(e) => setDniArrep(e.target.value)}
+                      placeholder="ej. 35123456"
+                      className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white dark:bg-valle-darkElevated border border-slate-300 dark:border-valle-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-valle-orange text-slate-900 dark:text-white"
+                    />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Producto o Préstamo a Revocar</label>
-                    <select className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white dark:bg-valle-darkElevated border border-slate-300 dark:border-valle-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-valle-orange text-slate-900 dark:text-white">
-                      {MODAL_CONTENT.arrepentimiento.opciones.map((op) => <option key={op}>{op}</option>)}
+                    <select
+                      value={productoArrep}
+                      onChange={(e) => setProductoArrep(e.target.value)}
+                      className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white dark:bg-valle-darkElevated border border-slate-300 dark:border-valle-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-valle-orange text-slate-900 dark:text-white"
+                    >
+                      {MODAL_CONTENT.arrepentimiento.opciones.map((op) => <option key={op} value={op}>{op}</option>)}
                     </select>
                   </div>
-                  <button type="submit" className="w-full py-3 bg-valle-orange hover:bg-valle-orangedark text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition">
-                    Confirmar Solicitud de Revocación
+                  <button
+                    type="submit"
+                    disabled={loadingAccion}
+                    className="w-full py-3 bg-valle-orange hover:bg-valle-orangedark text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {loadingAccion ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />}
+                    <span>{loadingAccion ? 'Procesando Revocación...' : 'Confirmar Solicitud de Revocación'}</span>
                   </button>
                 </form>
               )}
@@ -357,6 +431,14 @@ export function Footer() {
             </div>
             <div className="p-6 space-y-4">
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{MODAL_CONTENT.bajaServicios.leyenda}</p>
+              
+              {errorAccion && (
+                <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 text-xs rounded-xl flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                  <span>{errorAccion}</span>
+                </div>
+              )}
+
               {mensajeExito ? (
                 <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-200 text-xs sm:text-sm rounded-xl font-medium flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
@@ -366,16 +448,32 @@ export function Footer() {
                 <form onSubmit={handleSolicitarBaja} className="space-y-3">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">DNI o CUIT del Titular</label>
-                    <input type="text" required placeholder="ej. 35123456" className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white dark:bg-valle-darkElevated border border-slate-300 dark:border-valle-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-valle-orange text-slate-900 dark:text-white" />
+                    <input
+                      type="text"
+                      required
+                      value={dniBaja}
+                      onChange={(e) => setDniBaja(e.target.value)}
+                      placeholder="ej. 35123456"
+                      className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white dark:bg-valle-darkElevated border border-slate-300 dark:border-valle-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-valle-orange text-slate-900 dark:text-white"
+                    />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Servicio a Dar de Baja</label>
-                    <select className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white dark:bg-valle-darkElevated border border-slate-300 dark:border-valle-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-valle-orange text-slate-900 dark:text-white">
-                      {MODAL_CONTENT.bajaServicios.opciones.map((op) => <option key={op}>{op}</option>)}
+                    <select
+                      value={servicioBaja}
+                      onChange={(e) => setServicioBaja(e.target.value)}
+                      className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-white dark:bg-valle-darkElevated border border-slate-300 dark:border-valle-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-valle-orange text-slate-900 dark:text-white"
+                    >
+                      {MODAL_CONTENT.bajaServicios.opciones.map((op) => <option key={op} value={op}>{op}</option>)}
                     </select>
                   </div>
-                  <button type="submit" className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition">
-                    Confirmar Pedido de Baja
+                  <button
+                    type="submit"
+                    disabled={loadingAccion}
+                    className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {loadingAccion ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserX className="w-4 h-4" />}
+                    <span>{loadingAccion ? 'Procesando Baja...' : 'Confirmar Pedido de Baja'}</span>
                   </button>
                 </form>
               )}

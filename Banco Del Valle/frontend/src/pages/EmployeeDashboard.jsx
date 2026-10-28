@@ -6,10 +6,11 @@ import { AlmGapsBarChart } from '../components/employee/AlmGapsBarChart';
 import { ProfitProjectionsChart } from '../components/employee/ProfitProjectionsChart';
 import { LiveRatesChart } from '../components/employee/LiveRatesChart';
 import { OperationsTable } from '../components/employee/OperationsTable';
+import { UsersModal } from '../components/employee/UsersModal';
 import { ExportModal } from '../components/common/ExportModal';
 import { apiClient } from '../services/apiClient';
 import { simSocket } from '../services/simSocket';
-import { ShieldCheck, Download, RotateCcw, Loader2 } from 'lucide-react';
+import { ShieldCheck, Download, RotateCcw, Loader2, Users } from 'lucide-react';
 
 /**
  * EmployeeDashboard — Terminal Ejecutiva y Cuantitativa de Control Bancario.
@@ -24,6 +25,7 @@ export function EmployeeDashboard() {
   const [resetKey, setResetKey] = useState(0);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [exportModulo, setExportModulo] = useState('BALANCE');
+  const [isUsersModalOpen, setIsUsersModalOpen] = useState(false);
 
   const recargarMetricas = async () => {
     try {
@@ -105,6 +107,17 @@ export function EmployeeDashboard() {
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             type="button"
+            onClick={() => setIsUsersModalOpen(true)}
+            className="px-4 py-2 bg-gradient-to-r from-valle-orange to-amber-500 hover:from-valle-orangedark hover:to-amber-600 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 group cursor-pointer"
+            title="Abrir Padrón Central de Clientes (Individuos y Empresas) en tiempo real"
+          >
+            <Users className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
+            <span>Padrón de Clientes & Empresas</span>
+            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+          </button>
+
+          <button
+            type="button"
             onClick={handleGlobalReset}
             disabled={isResetting}
             title="Restablecer simulación, base de datos y todas las gráficas a valores iniciales"
@@ -160,6 +173,12 @@ export function EmployeeDashboard() {
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
         defaultModulo={exportModulo}
+      />
+
+      {/* Visor Modal del Padrón Central de Clientes (Individuos & Empresas) */}
+      <UsersModal
+        isOpen={isUsersModalOpen}
+        onClose={() => setIsUsersModalOpen(false)}
       />
     </div>
   );

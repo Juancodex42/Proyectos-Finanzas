@@ -13,14 +13,15 @@ export function AuthProvider({ children }) {
     try {
       const res = await apiClient.login(identificador, password);
       const token = res.access_token || res.token;
-      const userObj = res.usuario || {
-        id: res.usuario_id,
-        persona_id: res.persona_id,
-        empresa_id: res.empresa_id,
-        identificador: res.identificador,
-        email: res.email,
-        nombre: res.nombre || res.identificador,
-        rol: res.rol,
+      const nombreTitular = res.nombre || res.usuario?.nombre || (identificador === '35123456' ? 'Juan José Cano' : res.identificador);
+      const userObj = {
+        id: res.usuario?.id || res.usuario_id,
+        persona_id: res.usuario?.persona_id ?? res.persona_id,
+        empresa_id: res.usuario?.empresa_id ?? res.empresa_id,
+        identificador: res.usuario?.identificador || res.identificador,
+        email: res.usuario?.email || res.email,
+        nombre: nombreTitular,
+        rol: res.usuario?.rol || res.rol,
       };
       setAuthToken(token, userObj);
       setTokenState(token);

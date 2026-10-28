@@ -199,3 +199,60 @@ def test_dashboard_reset_simulacion(api_client):
     assert data["fecha_simulada"] == "2026-10-26"
     assert data["capital_propio"] == 50000000.0
 
+
+def test_dashboard_usuarios_paginado(api_client):
+    """Valida el endpoint paginado del Padrón Central de Clientes."""
+    res = api_client.get("/api/dashboard/usuarios?page=1&limit=10")
+    assert res.status_code == 200
+    data = res.json()
+    assert "usuarios" in data
+    assert "total" in data
+    assert "pagina" in data
+    assert "total_paginas" in data
+    assert data["total"] >= 1
+    assert any(u["nombre_titular"] == "Juan José Cano" for u in data["usuarios"])
+
+
+def test_dashboard_exportar_usuarios(api_client):
+    """Valida la exportación del Padrón de Clientes en CSV."""
+    res = api_client.get("/api/dashboard/exportar?modulo=USUARIOS&formato=csv")
+    assert res.status_code == 200
+    assert res.headers["content-type"] == "text/csv; charset=utf-8"
+
+
+def test_login_retorna_nombre_display(api_client):
+    """Valida que el login retorne 'nombre' en la raíz con el nombre del usuario."""
+    res = api_client.post(
+        "/api/auth/login",
+        json={"identificador": "35123456", "password": "Valle1234!"},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["nombre"] == "Juan José Cano"
+    assert data["identificador"] == "35123456"
+
+
+def test_solicitar_baja_rechaza_por_saldo_o_deuda(api_client):
+    """Valida que la solicitud de baja rechace si la cuenta registra saldo remanente."""
+    res = api_client.post(
+        "/api/clientes/solicitar-baja",
+        json={"identificador": "35123456", "motivo": "Prueba de baja", "servicio": "Cuenta Sueldo"},
+    )
+    # Juan José Cano tiene saldo > 0, por lo que debe ser rechazada normativamente
+    assert res.status_code == 400
+    assert "saldo remanente" in res.json()["detail"].lower() or "deuda" in res.json()["detail"].lower()
+
+
+def test_boton_arrepentimiento_plazo_fijo_o_servicio(api_client):
+    """Valida el botón de arrepentimiento conforme Ley 24.240."""
+    res = api_client.post(
+        "/api/clientes/arrepentimiento",
+        json={"identificador": "35123456", "tipo_producto": "PRESTAMO", "motivo": "Revocación s/ Ley 24.240"},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["exito"] is True
+    assert "numero_tramite" in data
+    assert data["numero_tramite"].startswith("ARREP-")
+
+

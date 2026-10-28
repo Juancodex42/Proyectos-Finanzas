@@ -103,12 +103,12 @@ A diferencia de barras estáticas que exponen todas las vistas en simultáneo, e
   * **La barra queda en modo exclusivamente gerencial:** Muestra el isotipo del banco, el badge destacado `Terminal Ejecutiva de Tesorería & ALM`, el perfil del operador (`Gerencia de Tesorería`), el switch de tema y el botón para `[ Cerrar Sesión ]`.
 * **C. Estado Autenticado como CLIENTE (`user.rol === 'CLIENTE'`):**
   * **Desaparecen las opciones corporativas:** Se oculta el botón de acceso a la terminal de *Gerencia* y el conmutador de segmentos.
-  * **La barra queda en modo transaccional:** Muestra el isotipo, el acceso a `Mi Cuenta (Home Banking)`, el saludo al titular (`Juan José Gonzalez`), avatar con iniciales y el botón para `[ Cerrar Sesión ]`.
+  * **La barra queda en modo transaccional:** Muestra el isotipo, el acceso a `Mi Cuenta (Home Banking)`, el saludo al titular (`Juan José Cano`), avatar con iniciales y el botón para `[ Cerrar Sesión ]`.
 
 #### 2. Modal de Inicio de Sesión (`LoginModal.jsx`) y "Cuentas Guardadas"
 * **Sustitución Terminológica Oficial:** En el modal de login se elimina la denominación *"Cuentas Demo"* o *"Accesos Demo de 1-Clic"*, reemplazándola formalmente por **"Cuentas Guardadas"**.
 * **Comportamiento:** Permite iniciar sesión directa con credenciales almacenadas para agilizar las pruebas de roles:
-  * **Juan José Gonzalez (Cliente):** Ingreso a Home Banking (`35123456` / `Valle1234!`).
+  * **Juan José Cano (Cliente):** Ingreso a Home Banking (`35123456` / `Valle1234!`).
   * **Gerencia de Tesorería (Gerente):** Ingreso a Dashboard ALM (`gerencia@bancodelvalle.com.ar` / `Gerencia2026!`).
 * Al iniciar sesión con cualquiera de las cuentas, la aplicación redirige de forma atómica a la vista respectiva y reconfigura la Navbar según el rol asignado.
 
@@ -257,7 +257,7 @@ La creación del usuario se realiza en un único bloque transaccional ACID (`BEG
 Al iniciar sesión como cliente individual estándar, la plataforma presenta un Home Banking completo conectado a SQLite:
 
 #### 1. Perfil del Usuario Demo ("Juan José")
-* **Nombre:** Juan José Gonzalez (`20-35123456-7` / `35123456`), San Fernando del Valle de Catamarca.
+* **Nombre:** Juan José Cano (`20-35123456-7` / `35123456`), San Fernando del Valle de Catamarca.
 * **Saldo Inicial Precargado:** **$3.000.000,00** en Caja de Ahorro remunerada.
 * **Cuenta Sueldo Activa:** Cobro mensual automático de **$3.000.000,00** el día 1 de cada mes simulado.
 * **Coordenadas Bancarias:** CBU `0000003100012345678901` | Alias `JUAN.BANCO.VALLE`.

@@ -11,7 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import { Loader2, AlertCircle, RotateCcw } from 'lucide-react';
 
 /**
- * ClientHomeBanking — Panel transaccional de Home Banking (Juan José Gonzalez).
+ * ClientHomeBanking — Panel transaccional de Home Banking (Juan José Cano).
  */
 export function ClientHomeBanking({ onGoToDashboard }) {
   const { user } = useAuth();
@@ -103,6 +103,10 @@ export function ClientHomeBanking({ onGoToDashboard }) {
   const saldo = data?.cuenta?.saldo_actual ?? 3000000;
   const tna = data?.cuenta?.tna_rendimiento_diario ?? 0.285;
   const rendimientoHoy = saldo * (tna / 365);
+  const nombreParaMostrar =
+    data?.persona?.nombre_completo ||
+    data?.titular ||
+    (user?.nombre && !/^\d+$/.test(user.nombre.trim()) ? user.nombre : 'Juan José Cano');
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-8 xl:px-12 py-8 animate-fade-in space-y-8">
@@ -110,7 +114,7 @@ export function ClientHomeBanking({ onGoToDashboard }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-2 border-b border-slate-200 dark:border-valle-darkBorder gap-2">
         <div>
           <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-white">
-            Hola, {data?.persona?.nombre_completo || user?.nombre || 'Titular'} 👋
+            Hola, {nombreParaMostrar} 👋
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
             DNI/CUIL: {data?.persona?.dni || user?.identificador || 'Verificado'} | San Fernando del Valle de Catamarca

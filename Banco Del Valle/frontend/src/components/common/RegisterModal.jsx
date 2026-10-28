@@ -321,7 +321,7 @@ export function RegisterModal({ isOpen, onClose, onSuccess, initialTipo = 'PERSO
                           required
                           value={persona.nombre_completo}
                           onChange={(e) => setPersona({ ...persona, nombre_completo: e.target.value })}
-                          placeholder="ej. Juan José Gonzalez"
+                          placeholder="ej. Juan José Cano"
                           className="w-full text-sm px-3.5 py-2.5 bg-white dark:bg-valle-darkElevated border border-slate-300 dark:border-valle-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-valle-orange text-slate-900 dark:text-slate-100"
                         />
                       </div>

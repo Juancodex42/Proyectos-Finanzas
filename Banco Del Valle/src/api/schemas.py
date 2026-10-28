@@ -248,3 +248,16 @@ class DepositoPruebaRequest(BaseModel):
     persona_id: Optional[int] = None
     monto: float = Field(500000.0, gt=0)
     descripcion: str = "Transferencia Inmediata Recibida — COELSA / Transferencias 3.0"
+
+
+class SolicitudBajaRequest(BaseModel):
+    identificador: Optional[str] = None
+    motivo: str = "Solicitud voluntaria del cliente conforme Ley 24.240"
+    servicio: str = "Cuenta Bancaria y Paquete de Servicios"
+
+
+class SolicitudArrepentimientoRequest(BaseModel):
+    identificador: Optional[str] = None
+    producto_id: Optional[int] = None
+    tipo_producto: str = "PRESTAMO"  # 'PRESTAMO' o 'PLAZO_FIJO'
+    motivo: Optional[str] = "Derecho de revocación dentro de los 10 días hábiles (Ley 24.240 y BCRA)"

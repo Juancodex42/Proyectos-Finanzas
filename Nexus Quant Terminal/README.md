@@ -106,15 +106,22 @@ nexus-quant-terminal/
 ### Prerrequisitos
 * Python 3.11 o superior.
 * Navegador moderno (Chrome, Edge, Firefox, Brave).
+* **Motor Genético en Rust:** El ejecutable de alta velocidad `genetic_optimizer.exe` se encuentra **precompilado para Windows x64**, por lo que **no es necesario tener instalado Rust ni Cargo** para ejecutar la terminal. *(Opcional: Si deseas compilarlo desde el código fuente en Linux/macOS, se requiere Rust 1.75+ y ejecutar `cargo build --release`).*
 
-### 1. Clonar el repositorio e instalar dependencias
+### 1. Preparar el entorno e instalar dependencias
 ```bash
+# Navegar al directorio
+cd "Nexus Quant Terminal"
+
 # Crear entorno virtual (opcional pero recomendado)
 python -m venv venv
 venv\Scripts\activate  # En Windows
 
 # Instalar librerías requeridas
 pip install -r requirements.txt
+
+# Configurar variables de entorno (opcional)
+copy .env.example .env
 ```
 
 ### 2. Ejecutar la Suite de Pruebas

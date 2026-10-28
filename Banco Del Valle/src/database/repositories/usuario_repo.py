@@ -5,7 +5,7 @@ Referencia de diseño: docs/seguridad_autenticacion_credenciales.md
 """
 
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 import sqlite3
 
 from src.domain.models import AuditoriaAcceso, RolUsuario, UsuarioCredencial
@@ -186,3 +186,191 @@ def obtener_auditoria_por_usuario(
         (usuario_id, limite),
     )
     return [_row_to_auditoria(row) for row in cursor.fetchall()]
+
+
+def _construir_query_base_usuarios() -> str:
+    """Retorna la CTE y subconsultas unificadas de clientes (Individuos y Empresas) con cuentas y créditos."""
+    return """
+    WITH prestamos_agg AS (
+        SELECT 
+            COALESCE(persona_id, 0) as p_id,
+            COALESCE(empresa_id, 0) as e_id,
+            COUNT(*) as total_prestamos,
+            SUM(CASE WHEN estado IN ('ACTIVO', 'AL_DIA', 'EN_MORA') THEN 1 ELSE 0 END) as prestamos_activos,
+            SUM(CASE WHEN estado IN ('ACTIVO', 'AL_DIA', 'EN_MORA') THEN monto_capital ELSE 0.0 END) as deuda_capital_activa,
+            GROUP_CONCAT(DISTINCT estado) as estados_prestamos
+        FROM prestamos
+        GROUP BY p_id, e_id
+    ),
+    cuentas_agg AS (
+        SELECT
+            COALESCE(persona_id, 0) as p_id,
+            COALESCE(empresa_id, 0) as e_id,
+            id as cuenta_id,
+            cbu,
+            alias,
+            saldo_actual,
+            estado as estado_cuenta_bancaria,
+            es_cuenta_sueldo,
+            tna_rendimiento_diario
+        FROM cuentas_transaccionales
+    )
+    SELECT 
+        'INDIVIDUO' as tipo_cliente,
+        p.id as cliente_id,
+        p.dni as identificador_fiscal,
+        p.nombre_completo as nombre_titular,
+        u.id as usuario_id,
+        u.email as email_contacto,
+        COALESCE(u.rol, 'CLIENTE') as rol_acceso,
+        p.categoria_laboral as subtipo_actividad,
+        p.categoria_laboral as tipo_empresa_o_laboral,
+        p.estado_cuenta as estado_cliente,
+        p.fecha_alta as fecha_registro,
+        c.cuenta_id,
+        COALESCE(c.cbu, '') as cbu,
+        COALESCE(c.alias, '') as alias,
+        COALESCE(c.saldo_actual, 0.0) as saldo_cuenta,
+        COALESCE(c.es_cuenta_sueldo, 0) as es_cuenta_sueldo,
+        COALESCE(pr.prestamos_activos, 0) as prestamos_activos,
+        COALESCE(pr.deuda_capital_activa, 0.0) as monto_prestamos,
+        COALESCE(pr.estados_prestamos, 'SIN_PRESTAMO') as estados_prestamos
+    FROM personas p
+    LEFT JOIN usuarios_credenciales u ON u.persona_id = p.id
+    LEFT JOIN cuentas_agg c ON c.p_id = p.id
+    LEFT JOIN prestamos_agg pr ON pr.p_id = p.id
+
+    UNION ALL
+
+    SELECT 
+        'EMPRESA' as tipo_cliente,
+        e.id as cliente_id,
+        e.cuit as identificador_fiscal,
+        e.razon_social as nombre_titular,
+        u.id as usuario_id,
+        u.email as email_contacto,
+        COALESCE(u.rol, 'CLIENTE') as rol_acceso,
+        (e.tipo_societario || ' - ' || e.rubro_actividad) as subtipo_actividad,
+        e.tipo_societario as tipo_empresa_o_laboral,
+        e.estado_cuenta as estado_cliente,
+        e.fecha_alta as fecha_registro,
+        c.cuenta_id,
+        COALESCE(c.cbu, '') as cbu,
+        COALESCE(c.alias, '') as alias,
+        COALESCE(c.saldo_actual, 0.0) as saldo_cuenta,
+        0 as es_cuenta_sueldo,
+        COALESCE(pr.prestamos_activos, 0) as prestamos_activos,
+        COALESCE(pr.deuda_capital_activa, 0.0) as monto_prestamos,
+        COALESCE(pr.estados_prestamos, 'SIN_PRESTAMO') as estados_prestamos
+    FROM empresas e
+    LEFT JOIN usuarios_credenciales u ON u.empresa_id = e.id
+    LEFT JOIN cuentas_agg c ON c.e_id = e.id
+    LEFT JOIN prestamos_agg pr ON pr.e_id = e.id
+    """
+
+
+def obtener_lista_usuarios_banco(
+    conn: sqlite3.Connection,
+    tipo_cliente: Optional[str] = None,
+    estado: Optional[str] = None,
+    busqueda: Optional[str] = None,
+    orden: str = "recientes",
+    limite: Optional[int] = 10,
+    offset: Optional[int] = 0,
+) -> List[Dict[str, Any]]:
+    """
+    Retorna la lista paginada y filtrada del Padrón Central de Clientes (Individuos y Empresas)
+    con sus cuentas transaccionales, saldo, préstamos a su nombre y fecha de registro.
+    """
+    base_sql = _construir_query_base_usuarios()
+    where_clauses = []
+    params: List[Any] = []
+
+    if tipo_cliente and tipo_cliente.upper() in ("INDIVIDUO", "EMPRESA"):
+        where_clauses.append("tipo_cliente = ?")
+        params.append(tipo_cliente.upper())
+
+    if estado and estado.upper() not in ("TODOS", ""):
+        where_clauses.append("UPPER(estado_cliente) = ?")
+        params.append(estado.upper())
+
+    if busqueda and busqueda.strip():
+        term = f"%{busqueda.strip().lower()}%"
+        where_clauses.append(
+            "(LOWER(nombre_titular) LIKE ? OR LOWER(identificador_fiscal) LIKE ? OR LOWER(email_contacto) LIKE ? OR LOWER(alias) LIKE ? OR cbu LIKE ?)"
+        )
+        params.extend([term, term, term, term, term])
+
+    where_str = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+
+    # Ordenamiento
+    order_map = {
+        "recientes": "ORDER BY fecha_registro DESC, cliente_id DESC",
+        "antiguos": "ORDER BY fecha_registro ASC, cliente_id ASC",
+        "mayor_saldo": "ORDER BY saldo_cuenta DESC",
+        "menor_saldo": "ORDER BY saldo_cuenta ASC",
+        "nombre_asc": "ORDER BY nombre_titular ASC",
+    }
+    order_clause = order_map.get(orden.lower(), "ORDER BY fecha_registro DESC, cliente_id DESC")
+
+    limit_clause = ""
+    if limite is not None:
+        limit_clause = f"LIMIT {int(limite)} OFFSET {int(offset or 0)}"
+
+    query = f"""
+    SELECT * FROM (
+        {base_sql}
+    )
+    {where_str}
+    {order_clause}
+    {limit_clause}
+    """
+
+    cursor = conn.cursor()
+    cursor.execute(query, tuple(params))
+    rows = cursor.fetchall()
+    
+    # Mapear a diccionarios
+    columnas = [col[0] for col in cursor.description]
+    return [dict(zip(columnas, row)) for row in rows]
+
+
+def contar_usuarios_banco(
+    conn: sqlite3.Connection,
+    tipo_cliente: Optional[str] = None,
+    estado: Optional[str] = None,
+    busqueda: Optional[str] = None,
+) -> int:
+    """Calcula el total de registros coincidentes con los filtros para la paginación."""
+    base_sql = _construir_query_base_usuarios()
+    where_clauses = []
+    params: List[Any] = []
+
+    if tipo_cliente and tipo_cliente.upper() in ("INDIVIDUO", "EMPRESA"):
+        where_clauses.append("tipo_cliente = ?")
+        params.append(tipo_cliente.upper())
+
+    if estado and estado.upper() not in ("TODOS", ""):
+        where_clauses.append("UPPER(estado_cliente) = ?")
+        params.append(estado.upper())
+
+    if busqueda and busqueda.strip():
+        term = f"%{busqueda.strip().lower()}%"
+        where_clauses.append(
+            "(LOWER(nombre_titular) LIKE ? OR LOWER(identificador_fiscal) LIKE ? OR LOWER(email_contacto) LIKE ? OR LOWER(alias) LIKE ? OR cbu LIKE ?)"
+        )
+        params.extend([term, term, term, term, term])
+
+    where_str = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+
+    query = f"""
+    SELECT COUNT(*) FROM (
+        {base_sql}
+    )
+    {where_str}
+    """
+
+    cursor = conn.cursor()
+    cursor.execute(query, tuple(params))
+    row = cursor.fetchone()
+    return int(row[0]) if row else 0

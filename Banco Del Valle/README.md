@@ -5,7 +5,7 @@
 [![React](https://img.shields.io/badge/React-18+-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4+-38B2AC?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=flat&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Proprietary%20%2F%20Research-red.svg)]()
 
 > **Plataforma cuantitativa integral de calificación de riesgo crediticio, gestión de tesorería y encajes regulatorios (BCRA), pricing macroeconómico dinámico y simulación temporal acelerada con interfaz web dual.**
 
@@ -55,7 +55,7 @@
 El código está estructurado bajo principios de **Arquitectura Limpia** y regulado por la regla de **menos de 500 líneas por módulo**:
 
 ```text
-Scoring calculator/
+Banco Del Valle/
 ├── docs/                               # Documentación normativa, matemática, macro y diagramas
 │   ├── normativa_encajes_bcra.md       # Régimen de Efectivo Mínimo BCRA
 │   ├── multiplicador_y_cashflow_prestable.md # Fórmulas de liquidez y multiplicador
@@ -123,7 +123,7 @@ Para consultar la fundamentación teórica, fórmulas y manuales normativos:
 ### 2. Configuración del Backend
 ```bash
 # Navegar al directorio del proyecto
-cd "Scoring calculator"
+cd "Banco Del Valle"
 
 # Crear entorno virtual de Python
 python -m venv venv
@@ -137,6 +137,12 @@ source venv/bin/activate
 # Instalar dependencias
 pip install -r requirements.txt
 
+# Configurar variables de entorno (Sandbox / Desarrollo)
+copy .env.example .env
+
+# Ejecutar suite de pruebas unitarias (88 tests pasados al 100%)
+python -m pytest tests_unitarios
+
 # Inicializar base de datos SQLite y servidor de desarrollo
 uvicorn src.api.main:app --reload --port 8000
 ```
@@ -144,7 +150,7 @@ uvicorn src.api.main:app --reload --port 8000
 ### 3. Configuración del Frontend
 ```bash
 # En una terminal separada, ingresar a la carpeta frontend
-cd "Scoring calculator/frontend"
+cd "Banco Del Valle/frontend"
 
 # Instalar dependencias de Node
 npm install

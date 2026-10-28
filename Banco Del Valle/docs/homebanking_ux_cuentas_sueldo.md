@@ -8,7 +8,7 @@ A diferencia de un mock estático o fachada visual, el **Portal de Cliente Auten
 
 ## 2. Usuario Demo Inicial: "Juan José"
 
-* **Nombre:** Juan José Gonzalez
+* **Nombre:** Juan José Cano
 * **DNI / CUIL:** `20-35123456-7` (`35123456`)
 * **Localidad:** San Fernando del Valle de Catamarca
 * **Tipo de Cuenta:** Caja de Ahorro / Cuenta Sueldo

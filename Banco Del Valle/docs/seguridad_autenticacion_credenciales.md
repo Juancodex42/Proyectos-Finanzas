@@ -70,5 +70,5 @@ Para facilitar las pruebas del evaluador en la interfaz web, el sistema cuenta c
 
 | Perfil de Acceso | Identificador / Usuario | Contraseña Demo | Rol y Permisos |
 | :--- | :--- | :--- | :--- |
-| **Cliente Demo (Home Banking)** | `35123456` (DNI Juan José Gonzalez) | `Valle1234!` | **`CLIENTE`**: Acceso al saldo de $3.000.000, transferencias, plazos fijos y cancelación anticipada. |
+| **Cliente Demo (Home Banking)** | `35123456` (DNI Juan José Cano) | `Valle1234!` | **`CLIENTE`**: Acceso al saldo de $3.000.000, transferencias, plazos fijos y cancelación anticipada. |
 | **Gerencia / Dueño (Terminal Ejecutiva)** | `gerencia@bancodelvalle.com.ar` | `admin2026` | **`GERENTE`**: Acceso a balances, encajes BCRA, proyecciones multi-escenario y **botón maestro de aceleración del tiempo**. |

@@ -63,9 +63,29 @@ def ejecutar_cierre_diario(
     # ------------------------------------------------------------------------
     # 1. Devengamiento y Acreditación de Rendimientos Diarios Flexibles
     # ------------------------------------------------------------------------
+    cursor = conn.cursor()
+    tipo_rend_val = (
+        TipoMovimiento.RENDIMIENTO_FLEXIBLE_DIARIO.value
+        if hasattr(TipoMovimiento.RENDIMIENTO_FLEXIBLE_DIARIO, "value")
+        else str(TipoMovimiento.RENDIMIENTO_FLEXIBLE_DIARIO)
+    )
     cuentas_activas = cuenta_repo.listar_todas_cuentas_activas(conn)
     for cuenta in cuentas_activas:
         if cuenta.saldo_actual > 0:
+            # Control de Idempotencia Estricta: evitar doble acreditación en la misma fecha calendario
+            cursor.execute(
+                """
+                SELECT 1 FROM movimientos_cuenta
+                WHERE cuenta_id = ?
+                  AND tipo_movimiento = ?
+                  AND fecha_hora LIKE ?
+                LIMIT 1
+                """,
+                (cuenta.id, tipo_rend_val, f"{fecha_iso}%"),
+            )
+            if cursor.fetchone():
+                continue
+
             interes_dia = calcular_interes_flexible_diario(
                 saldo=cuenta.saldo_actual,
                 tna_flexible=cuenta.tna_rendimiento_diario,
@@ -89,12 +109,31 @@ def ejecutar_cierre_diario(
     # ------------------------------------------------------------------------
     # 2. Acreditación de Haberes Mensuales (si coincide el día del mes)
     # ------------------------------------------------------------------------
+    tipo_sueldo_val = (
+        TipoMovimiento.ACREDITACION_SUELDO.value
+        if hasattr(TipoMovimiento.ACREDITACION_SUELDO, "value")
+        else str(TipoMovimiento.ACREDITACION_SUELDO)
+    )
     personas = persona_repo.listar_personas(conn, limite=1000)
     for p in personas:
         if p.monto_sueldo_acreditado > 0 and p.dia_cobro_sueldo == fecha_simulada.day:
             cuentas_p = cuenta_repo.obtener_cuentas_por_persona(conn, p.id)
             cuenta_sueldo = next((c for c in cuentas_p if c.es_cuenta_sueldo), None) or (cuentas_p[0] if cuentas_p else None)
             if cuenta_sueldo:
+                # Control de Idempotencia: no duplicar sueldo si ya fue acreditado en la fecha
+                cursor.execute(
+                    """
+                    SELECT 1 FROM movimientos_cuenta
+                    WHERE cuenta_id = ?
+                      AND tipo_movimiento = ?
+                      AND fecha_hora LIKE ?
+                    LIMIT 1
+                    """,
+                    (cuenta_sueldo.id, tipo_sueldo_val, f"{fecha_iso}%"),
+                )
+                if cursor.fetchone():
+                    continue
+
                 nuevo_saldo = round(cuenta_sueldo.saldo_actual + p.monto_sueldo_acreditado, 2)
                 cuenta_repo.actualizar_saldo(conn, cuenta_sueldo.id, nuevo_saldo)
                 movimiento_repo.registrar_movimiento(

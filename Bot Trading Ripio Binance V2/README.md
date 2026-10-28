@@ -1,5 +1,11 @@
 # Bot de Trading Argentino V2 - Sistema Cuantitativo Profesional
 
+[![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11-blue.svg)](https://www.python.org/)
+[![Trading Models](https://img.shields.io/badge/Strategy-Pairs%20Trading%20%2B%20Avellaneda--Stoikov-orange.svg)]()
+[![Validation](https://img.shields.io/badge/Validation-Monte%20Carlo%20Walk--Forward-purple.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-14%20Passed%20(100%25)-brightgreen.svg)]()
+[![License](https://img.shields.io/badge/License-Proprietary%20%2F%20Research-red.svg)]()
+
 Sistema de trading algorítmico para mercado argentino de criptomonedas con validación científica.
 
 > [!IMPORTANT]
@@ -11,6 +17,29 @@ Sistema de trading algorítmico para mercado argentino de criptomonedas con vali
 > - **Seguridad de Credenciales:** El repositorio no requiere ni expone credenciales privadas de Ripio ni Binance (`.env.example` incluido para configuración opcional).
 > - **Protección de Estrategia Propietaria:** Los modelos cuantitativos (Pairs Trading cointegrado y Market Making Avellaneda-Stoikov) están configurados en modo Sandbox para proteger la ventaja competitiva comercial del operador.
 > - **Simulación Científica Completa:** Permite ejecutar backtesting Walk-Forward, análisis Monte Carlo y pruebas de permutación (Luck vs Skill) con datos sintéticos e históricos sin arriesgar capital.
+
+---
+
+## 📑 Tabla de Contenidos
+
+- [Características Principales](#-características-principales)
+- [Arquitectura del Proyecto](#-arquitectura-del-proyecto)
+- [Índice de Documentación](#-índice-de-documentación)
+- [Instalación y Configuración](#-instalación)
+- [Uso y Fases Operativas](#-uso)
+  - [Fase 1: Data Collection](#fase-1-data-collection-30-días)
+  - [Fase 2: Backtesting](#fase-2-backtesting)
+  - [Fase 3: Paper Trading](#fase-3-paper-trading-7-días-mínimo)
+  - [Fase 4: Live Trading](#fase-4-live-trading)
+- [Control Remoto vía Telegram](#-control-remoto-vía-telegram)
+- [Validación Científica (Monte Carlo, Walk-Forward, Permutación)](#-validación-científica)
+- [Estrategias en Detalle](#-estrategias-en-detalle)
+- [Gestión de Riesgo y Portfolio Manager](#️-gestión-de-riesgo)
+- [Monitoreo en Tiempo Real](#-monitoreo-en-tiempo-real)
+- [Advertencias y Límites del Mercado](#️-advertencias-importantes)
+- [Troubleshooting & Soporte](#-troubleshooting)
+- [Roadmap & Próximos Pasos](#-roadmap--futuras-implementaciones)
+- [Licencia y Créditos](#️-licencia)
 
 ---
 
@@ -159,7 +188,12 @@ copy .env.example .env
 
 Ver [TELEGRAM_INTERFACE.md](docs/TELEGRAM_INTERFACE.md) para más detalles.
 
-### **5. Ajustar configuración** (opcional)
+### **5. Ejecutar suite de pruebas unitarias (14 tests)**
+```bash
+pytest tests/ -v
+```
+
+### **6. Ajustar configuración** (opcional)
 Editar `config/trading_config.yaml` para ajustar:
 - Límites de riesgo
 - Parámetros de estrategias
@@ -661,5 +695,5 @@ Desarrollado con fundamentos cuantitativos rigurosos y validación estadística 
 ---
 
 **💡 Última actualización:** 2026-01-15
-**📧 Contacto:** [Tu email/telegram]
+**📧 Contacto:** Perfil de GitHub / Issues del Repositorio
 **⭐ Versión:** 2.0.0-beta

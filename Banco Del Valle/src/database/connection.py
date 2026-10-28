@@ -66,7 +66,7 @@ def seed_initial_data(conn: sqlite3.Connection) -> None:
     """Siembra los registros de demostración requeridos por la arquitectura y UX."""
     cursor = conn.cursor()
 
-    # Verificar si Juan José Gonzalez ya fue sembrado
+    # Verificar si Juan José Cano ya fue sembrado
     cursor.execute("SELECT id FROM personas WHERE dni = ?", ("35123456",))
     if cursor.fetchone() is not None:
         return
@@ -74,7 +74,7 @@ def seed_initial_data(conn: sqlite3.Connection) -> None:
     today_iso = "2026-10-26"
     now_iso = "2026-10-26 09:00:00"
 
-    # 1. Persona Humana: Juan José Gonzalez (Catamarca)
+    # 1. Persona Humana: Juan José Cano (Catamarca)
     cursor.execute(
         """
         INSERT INTO personas (
@@ -85,7 +85,7 @@ def seed_initial_data(conn: sqlite3.Connection) -> None:
         """,
         (
             "35123456",
-            "Juan José Gonzalez",
+            "Juan José Cano",
             "San Fernando del Valle de Catamarca",
             "EMPLEADO_PRIVADO",
             48,
@@ -220,7 +220,7 @@ def seed_initial_data(conn: sqlite3.Connection) -> None:
             intentos_fallidos, bloqueado_hasta, ultimo_login, fecha_creacion
         ) VALUES (?, NULL, ?, ?, ?, ?, ?, NULL, NULL, ?)
         """,
-        (persona_id, "35123456", "juan.gonzalez@valle.com.ar", pass_juan_hash, "CLIENTE", 0, now_iso),
+        (persona_id, "35123456", "juan.cano@valle.com.ar", pass_juan_hash, "CLIENTE", 0, now_iso),
     )
 
     pass_admin_hash = _hash_password("Gerencia2026!")
@@ -291,6 +291,8 @@ def init_db(db_path: Optional[str] = None, seed_demo: bool = True) -> None:
 
 def reset_database(conn: Optional[sqlite3.Connection] = None, db_path: Optional[str] = None) -> None:
     """Restablece la base de datos eliminando operaciones simuladas y resembrando el estado inicial limpio."""
+    if conn is not None:
+        conn.execute("PRAGMA foreign_keys = OFF;")
     with transaction(conn=conn, db_path=db_path) as c:
         c.execute("PRAGMA foreign_keys = OFF;")
         tablas = [
@@ -311,12 +313,12 @@ def reset_database(conn: Optional[sqlite3.Connection] = None, db_path: Optional[
         for t in tablas:
             try:
                 c.execute(f"DELETE FROM {t};")
-            except sqlite3.OperationalError:
+            except (sqlite3.OperationalError, sqlite3.IntegrityError):
                 pass
         try:
             c.execute("DELETE FROM sqlite_sequence;")
-        except sqlite3.OperationalError:
+        except (sqlite3.OperationalError, sqlite3.IntegrityError):
             pass
-        c.execute("PRAGMA foreign_keys = ON;")
         seed_initial_data(c)
+        c.execute("PRAGMA foreign_keys = ON;")
 

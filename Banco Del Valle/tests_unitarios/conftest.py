@@ -30,7 +30,7 @@ def persona_juan_jose() -> Persona:
     return Persona(
         id=1,
         dni="35123456",
-        nombre_completo="Juan José Gonzalez",
+        nombre_completo="Juan José Cano",
         localidad="San Fernando del Valle de Catamarca",
         categoria_laboral=CategoriaLaboral.EMPLEADO_PRIVADO,
         antiguedad_laboral_meses=24,
